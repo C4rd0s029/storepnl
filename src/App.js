@@ -68,6 +68,130 @@ function ChartTip({ active, payload, label }) {
   );
 }
 
+
+// ── MOBILE ADD FORM ───────────────────────────────────────────────────────────
+function MobileAddForm({ form, setForm, editId, saving, preview, onSave, onBack, f, eur, pct, mono, T }) {
+  const fields = [
+    { key:"revenue", label:"Faturação", emoji:"💰" },
+    { key:"cog",     label:"Custo Produto", emoji:"📦" },
+    { key:"ads_fb",  label:"Meta Ads", emoji:"📣" },
+    { key:"ads2",    label:"Adspend 2", emoji:"📢" },
+    { key:"ads3",    label:"Adspend 3", emoji:"📡" },
+    { key:"refunds", label:"Devoluções", emoji:"↩️" },
+  ];
+
+  const refs = fields.reduce((acc, f) => { acc[f.key] = { current: null }; return acc; }, {});
+  const [activeField, setActiveField] = useState(null);
+
+  function handleNext(currentKey) {
+    const idx = fields.findIndex(f => f.key === currentKey);
+    if (idx < fields.length - 1) {
+      refs[fields[idx + 1].key].current?.focus();
+    } else {
+      refs[fields[idx].key].current?.blur();
+    }
+  }
+
+  function handleChange(key, val) {
+    // Allow digits, comma and dot only
+    const clean = val.replace(/[^0-9.,]/g, "");
+    setForm(p => ({ ...p, [key]: clean }));
+  }
+
+  return (
+    <div style={{ minHeight:"100vh", background:T.bg, fontFamily:"'DM Sans',sans-serif", display:"flex", flexDirection:"column" }}>
+      {/* Header */}
+      <div style={{ background:T.surface, borderBottom:`1px solid ${T.border}`, padding:"52px 20px 16px", display:"flex", alignItems:"center", gap:14, flexShrink:0 }}>
+        <button onClick={onBack} style={{ background:T.bg, border:`1px solid ${T.border}`, borderRadius:10, width:36, height:36, display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer", fontSize:16, flexShrink:0 }}>←</button>
+        <div>
+          <div style={{ fontSize:19, fontWeight:800, letterSpacing:"-0.02em" }}>{editId ? "Editar Dia" : "Adicionar Dia"}</div>
+          <div style={{ fontSize:12, color:T.textMuted }}>Preenche os valores do dia</div>
+        </div>
+      </div>
+
+      {/* Date picker */}
+      <div style={{ background:T.surface, borderBottom:`1px solid ${T.border}`, padding:"14px 20px", flexShrink:0 }}>
+        <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+          <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+            <span style={{ fontSize:18 }}>📅</span>
+            <div>
+              <div style={{ fontSize:11, color:T.textMuted, fontWeight:600, letterSpacing:"0.06em", textTransform:"uppercase" }}>Data</div>
+              <div style={{ fontSize:14, fontWeight:600, color:T.text }}>{new Date(form.date + "T00:00:00").toLocaleDateString("pt-PT", { weekday:"short", day:"numeric", month:"short" })}</div>
+            </div>
+          </div>
+          <input type="date" value={form.date} onChange={f("date")}
+            style={{ background:"transparent", border:"none", outline:"none", fontSize:13, color:T.textMuted, cursor:"pointer", fontFamily:"inherit" }} />
+        </div>
+      </div>
+
+      {/* Fields */}
+      <div style={{ flex:1, overflowY:"auto", padding:"8px 0 0" }}>
+        {fields.map((field, idx) => {
+          const val = form[field.key];
+          const isActive = activeField === field.key;
+          const hasValue = val && val !== "" && val !== "0" && val !== "0,00";
+          return (
+            <div key={field.key}
+              style={{ background:T.surface, borderBottom:`1px solid ${T.border}`, padding:"0", transition:"all 0.15s" }}>
+              <div style={{ display:"flex", alignItems:"center", padding:"14px 20px", gap:14 }}>
+                <span style={{ fontSize:22, flexShrink:0 }}>{field.emoji}</span>
+                <div style={{ flex:1, minWidth:0 }}>
+                  <div style={{ fontSize:11, color:T.textMuted, fontWeight:600, letterSpacing:"0.06em", textTransform:"uppercase", marginBottom:2 }}>{field.label}</div>
+                  <div style={{ display:"flex", alignItems:"center", gap:4 }}>
+                    <span style={{ color:hasValue?T.text:T.textLight, fontSize:15, fontWeight:hasValue?700:400 }}>€</span>
+                    <input
+                      ref={el => { refs[field.key].current = el; }}
+                      type="text"
+                      inputMode="decimal"
+                      value={val}
+                      onChange={e => handleChange(field.key, e.target.value)}
+                      onFocus={() => setActiveField(field.key)}
+                      onBlur={() => setActiveField(null)}
+                      onKeyDown={e => { if (e.key === "Enter" || e.key === "Next") { e.preventDefault(); handleNext(field.key); } }}
+                      enterKeyHint={idx < fields.length - 1 ? "next" : "done"}
+                      placeholder="0,00"
+                      style={{ flex:1, background:"transparent", border:"none", outline:"none", fontSize:18, fontWeight:700, color:hasValue?T.text:T.textLight, fontFamily:mono, padding:0, width:"100%" }}
+                    />
+                  </div>
+                </div>
+                {hasValue && (
+                  <button onClick={() => setForm(p => ({ ...p, [field.key]: "" }))}
+                    style={{ background:T.bg, border:`1px solid ${T.border}`, borderRadius:"50%", width:24, height:24, display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer", fontSize:12, color:T.textMuted, flexShrink:0, padding:0 }}>✕</button>
+                )}
+              </div>
+              {isActive && (
+                <div style={{ height:2, background:T.text, margin:"0 20px", borderRadius:2 }} />
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Preview + Save — always visible above keyboard */}
+      <div style={{ background:T.surface, borderTop:`1px solid ${T.border}`, padding:"14px 20px 32px", flexShrink:0 }}>
+        {preview && (
+          <div style={{ display:"flex", justifyContent:"space-around", marginBottom:14, background:T.bg, borderRadius:12, padding:"12px 8px" }}>
+            {[
+              ["Lucro", eur(preview.profit), preview.profit>=0?T.green:T.red],
+              ["ROAS", preview.roas?preview.roas.toFixed(2)+"x":"—", T.text],
+              ["Margem", pct(preview.margin), preview.margin>=0?T.green:T.red],
+            ].map(([l,v,c]) => (
+              <div key={l} style={{ textAlign:"center" }}>
+                <div style={{ color:T.textMuted, fontSize:10, fontWeight:600, textTransform:"uppercase", letterSpacing:"0.05em", marginBottom:2 }}>{l}</div>
+                <div style={{ color:c, fontSize:15, fontWeight:800, fontFamily:mono }}>{v}</div>
+              </div>
+            ))}
+          </div>
+        )}
+        <button onClick={onSave} disabled={saving}
+          style={{ width:"100%", background:T.text, border:"none", borderRadius:14, padding:"16px", color:"#fff", fontSize:16, fontWeight:800, cursor:"pointer", letterSpacing:"-0.01em" }}>
+          {saving ? "A guardar..." : editId ? "Actualizar Dia" : "Guardar Dia"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ── AUTH ──────────────────────────────────────────────────────────────────────
 function AuthScreen() {
   const [modo, setModo] = useState("login");
@@ -873,34 +997,13 @@ export default function App() {
       )}
 
       {tab==="add" && (
-        <div style={{ paddingBottom:90 }}>
-          <div style={{ background:T.surface, borderBottom:`1px solid ${T.border}`, padding:"52px 20px 16px", display:"flex", alignItems:"center", gap:14 }}>
-            <button onClick={()=>{setTab("home");resetForm();}} style={{ background:T.bg, border:`1px solid ${T.border}`, borderRadius:10, width:36, height:36, display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer", fontSize:16 }}>←</button>
-            <div style={{ fontSize:20, fontWeight:800 }}>{editId?"Editar Dia":"Adicionar Dia"}</div>
-          </div>
-          <div style={{ padding:"16px" }}>
-            {[["date","Data","date"],["revenue","Faturação (€)","decimal"],["cog","Custo de Produto (€)","decimal"],["ads_fb","Meta Adspend (€)","decimal"],["ads2","Adspend 2 (€)","decimal"],["ads3","Adspend 3 (€)","decimal"],["refunds","Devoluções (€)","decimal"]].map(([key,label,mode])=>(
-              <div key={key} style={{ marginBottom:12 }}>
-                <div style={{ color:T.textMuted, fontSize:11, fontWeight:600, letterSpacing:"0.06em", textTransform:"uppercase", marginBottom:6 }}>{label}</div>
-                <input type={mode==="date"?"date":"text"} inputMode={mode} value={form[key]} onChange={f(key)} placeholder="0,00"
-                  style={{ width:"100%", background:T.surface, border:`1.5px solid ${T.border}`, borderRadius:12, padding:"13px 16px", color:T.text, fontSize:15, outline:"none" }} />
-              </div>
-            ))}
-            {preview && (
-              <div style={{ background:T.bg, border:`1px solid ${T.border}`, borderRadius:12, padding:"16px 20px", marginBottom:14 }}>
-                <div style={{ color:T.textMuted, fontSize:11, fontWeight:600, textTransform:"uppercase", letterSpacing:"0.06em", marginBottom:10 }}>Pré-visualização</div>
-                <div style={{ display:"flex", justifyContent:"space-between" }}>
-                  {[["Lucro",eur(preview.profit),preview.profit>=0?T.green:T.red],["ROAS",preview.roas?preview.roas.toFixed(2)+"x":"—",T.green],["Margem",pct(preview.margin),preview.margin>=0?T.green:T.red]].map(([l,v,c])=>(
-                    <div key={l} style={{ textAlign:"center" }}><div style={{ color:T.textMuted, fontSize:11, marginBottom:3 }}>{l}</div><div style={{ color:c, fontSize:16, fontWeight:800, fontFamily:mono }}>{v}</div></div>
-                  ))}
-                </div>
-              </div>
-            )}
-            <button onClick={handleSave} disabled={saving} style={{ width:"100%", background:T.text, border:"none", borderRadius:14, padding:"15px", color:"#fff", fontSize:16, fontWeight:700, cursor:"pointer" }}>
-              {saving?"A guardar...":editId?"Actualizar Dia":"Guardar Dia"}
-            </button>
-          </div>
-        </div>
+        <MobileAddForm
+          form={form} setForm={setForm} editId={editId}
+          saving={saving} preview={preview}
+          onSave={handleSave}
+          onBack={() => { setTab("home"); resetForm(); }}
+          f={f} eur={eur} pct={pct} mono={mono} T={T}
+        />
       )}
 
 
