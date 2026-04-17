@@ -405,7 +405,7 @@ function MobileAddForm({ form, setForm, editId, saving, preview, onSave, onBack,
 
 // ── AUTH ──────────────────────────────────────────────────────────────────────
 function AuthScreen() {
-  const [modo, setModo] = useState("login");
+  const [modo, setModo] = useState(() => window.location.search.includes("registo") ? "registo" : "login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
