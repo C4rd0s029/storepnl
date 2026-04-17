@@ -829,6 +829,13 @@ export default function App() {
     const { data } = await supabase.from("profiles").select("*").eq("id", session.user.id).single();
     setProfile(data || false);
     setProfileLoading(false);
+
+    // Handle payment success redirect
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("payment") === "success") {
+      await supabase.from("profiles").upsert({ id: session.user.id, plan: "pro" });
+      window.history.replaceState({}, "", "/");
+    }
   }
 
   async function loadEntries() {
@@ -861,6 +868,21 @@ export default function App() {
     setEditId(r.id); setTab("add");
   }
   function resetForm() { setForm({ date:TODAY, revenue:"", cog:"", ads_fb:"", ads2:"", ads3:"", refunds:"" }); setEditId(null); }
+
+  async function handleUpgrade() {
+    try {
+      const res = await fetch('/api/create-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: session.user.id, email: session.user.email }),
+      });
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+      else alert('Erro ao iniciar pagamento. Tenta novamente.');
+    } catch (err) {
+      alert('Erro de ligação. Tenta novamente.');
+    }
+  }
 
   async function handleSettingsSave() {
     setSettingsSaving(true);
@@ -1623,7 +1645,18 @@ export default function App() {
             </button>
 
             <div style={{ ...card, padding:"18px 20px", marginBottom:12 }}>
-              <div style={{ color:T.textMuted, fontSize:12, marginBottom:12 }}>{session.user.email}</div>
+              <div style={{ color:T.textMuted, fontSize:11, fontWeight:600, letterSpacing:"0.06em", textTransform:"uppercase", marginBottom:10 }}>Plano</div>
+              {profile?.plan === "pro" ? (
+                <div style={{ background:T.greenBg, border:`1px solid ${T.greenBorder}`, borderRadius:10, padding:"12px 14px", marginBottom:12, display:"flex", alignItems:"center", gap:8 }}>
+                  <span>✓</span>
+                  <div><div style={{ color:T.green, fontWeight:700, fontSize:13 }}>StorePNL Pro</div><div style={{ color:T.green, fontSize:11 }}>€4/mês · activo</div></div>
+                </div>
+              ) : (
+                <button onClick={handleUpgrade} style={{ width:"100%", background:T.text, border:"none", borderRadius:10, padding:"12px", color:"#fff", fontSize:14, fontWeight:700, cursor:"pointer", marginBottom:12 }}>
+                  Subscrever — €4/mês →
+                </button>
+              )}
+              <div style={{ color:T.textMuted, fontSize:12, marginBottom:10 }}>{session.user.email}</div>
               <button onClick={() => supabase.auth.signOut()} style={{ width:"100%", background:T.redBg, border:`1px solid ${T.redBorder}`, borderRadius:10, padding:"11px", color:T.red, fontSize:13, fontWeight:600, cursor:"pointer" }}>Sair da conta</button>
             </div>
 
