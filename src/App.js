@@ -405,7 +405,7 @@ function MobileAddForm({ form, setForm, editId, saving, preview, onSave, onBack,
 
 
 // ── LANDING PAGE ─────────────────────────────────────────────────────────────
-function LandingPage({ onStart }) {
+function LandingPage({ onStart, onCheckout, checking }) {
   const isMobile = useIsMobile();
 
   const S = {
@@ -458,8 +458,8 @@ function LandingPage({ onStart }) {
         </p>
 
         <div style={{ display:"flex", gap:12, flexWrap:"wrap", justifyContent:"center", marginBottom:14 }}>
-          <button onClick={() => onStart("registo")} style={{ background:S.text, color:"#fff", border:"none", borderRadius:12, padding:"14px 28px", fontSize:16, fontWeight:700, cursor:"pointer", fontFamily:"inherit" }}>
-            Começar agora — €4/mês
+          <button onClick={onCheckout} disabled={checking} style={{ background:S.text, color:"#fff", border:"none", borderRadius:12, padding:"14px 28px", fontSize:16, fontWeight:700, cursor:checking?"not-allowed":"pointer", fontFamily:"inherit", opacity:checking?0.7:1 }}>
+            {checking ? "A redirecionar..." : "Começar agora — €4/mês"}
           </button>
           <a href="#features" style={{ background:S.surface, color:S.text, border:`1px solid ${S.border}`, borderRadius:12, padding:"14px 28px", fontSize:16, fontWeight:600, cursor:"pointer", textDecoration:"none" }}>
             Ver como funciona
@@ -573,8 +573,8 @@ function LandingPage({ onStart }) {
                 </li>
               ))}
             </ul>
-            <button onClick={() => onStart("registo")} style={{ width:"100%", background:"#fff", border:"none", borderRadius:12, padding:14, fontSize:15, fontWeight:700, cursor:"pointer", fontFamily:"inherit", color:S.text }}>
-              Começar agora →
+            <button onClick={onCheckout} disabled={checking} style={{ width:"100%", background:"#fff", border:"none", borderRadius:12, padding:14, fontSize:15, fontWeight:700, cursor:checking?"not-allowed":"pointer", fontFamily:"inherit", color:S.text, opacity:checking?0.7:1 }}>
+              {checking ? "A redirecionar..." : "Começar agora →"}
             </button>
           </div>
         </div>
@@ -609,8 +609,8 @@ function LandingPage({ onStart }) {
       <div style={{ background:S.text, borderRadius:24, padding:isMobile?"40px 20px":"64px 32px", textAlign:"center", margin:`0 ${isMobile?"12px":"24px"} 80px`, maxWidth:900, marginLeft:"auto", marginRight:"auto" }}>
         <h2 style={{ fontSize:isMobile?"28px":"44px", fontWeight:800, color:"#fff", letterSpacing:"-0.03em", marginBottom:12 }}>Começa hoje.<br/>€4/mês.</h2>
         <p style={{ color:"rgba(255,255,255,0.5)", fontSize:16, marginBottom:32 }}>Junta-te a lojistas que já sabem exactamente quanto ganham todos os dias.</p>
-        <button onClick={() => onStart("registo")} style={{ background:"#fff", color:S.text, border:"none", borderRadius:12, padding:"14px 32px", fontSize:16, fontWeight:700, cursor:"pointer", fontFamily:"inherit" }}>
-          Começar agora →
+        <button onClick={onCheckout} disabled={checking} style={{ background:"#fff", color:S.text, border:"none", borderRadius:12, padding:"14px 32px", fontSize:16, fontWeight:700, cursor:checking?"not-allowed":"pointer", fontFamily:"inherit", opacity:checking?0.7:1 }}>
+          {checking ? "A redirecionar..." : "Começar agora →"}
         </button>
         <p style={{ color:"rgba(255,255,255,0.3)", fontSize:12, marginTop:14 }}>€4/mês · Cancela quando quiseres · Sem compromissos</p>
       </div>
@@ -628,8 +628,49 @@ function LandingPage({ onStart }) {
   );
 }
 
+
+// ── PAYWALL ───────────────────────────────────────────────────────────────────
+function PaywallScreen({ onUpgrade, onLogout, email, checking, T }) {
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+  return (
+    <div style={{ minHeight:"100vh", background:T.bg, display:"flex", alignItems:"center", justifyContent:"center", padding:20, fontFamily:"'DM Sans',sans-serif" }}>
+      <div style={{ width:"100%", maxWidth:400, textAlign:"center" }}>
+        <div style={{ display:"inline-flex", alignItems:"center", justifyContent:"center", width:52, height:52, background:T.text, borderRadius:16, marginBottom:20 }}>
+          <div style={{ display:"flex", alignItems:"flex-end", gap:2, height:20 }}>
+            {[8,12,16,20].map((h,i) => <div key={i} style={{ width:4, height:h, background:"#4ade80", borderRadius:"2px 2px 0 0", opacity:[0.3,0.5,0.75,1][i] }} />)}
+          </div>
+        </div>
+        <div style={{ fontSize:24, fontWeight:800, letterSpacing:"-0.03em", marginBottom:8 }}>Começa a usar o StorePNL</div>
+        <div style={{ color:T.textMuted, fontSize:15, marginBottom:36, lineHeight:1.6 }}>Subscreve para ter acesso completo à tua dashboard P&L.</div>
+
+        <div style={{ background:T.surface, border:`1px solid ${T.border}`, borderRadius:20, padding:"28px 24px", marginBottom:14, textAlign:"left" }}>
+          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"baseline", marginBottom:20 }}>
+            <div style={{ fontSize:16, fontWeight:700 }}>StorePNL Pro</div>
+            <div style={{ fontFamily:"'DM Mono',monospace", fontSize:28, fontWeight:800, letterSpacing:"-0.03em" }}>€4<span style={{ fontSize:14, fontWeight:400, color:T.textMuted }}>/mês</span></div>
+          </div>
+          <ul style={{ listStyle:"none", marginBottom:24 }}>
+            {["Dashboard P&L diária","Comparação vs ontem","Analytics por período","Import de Excel (.xlsx)","Mobile + Desktop","Logo e nome da loja"].map(f => (
+              <li key={f} style={{ fontSize:14, padding:"7px 0", borderBottom:`1px solid ${T.border}`, display:"flex", alignItems:"center", gap:8 }}>
+                <span style={{ color:T.green, fontWeight:700 }}>✓</span> {f}
+              </li>
+            ))}
+          </ul>
+          <button onClick={onUpgrade} disabled={checking}
+            style={{ width:"100%", background:T.text, border:"none", borderRadius:12, padding:"14px", color:"#fff", fontSize:15, fontWeight:700, cursor:checking?"not-allowed":"pointer", fontFamily:"inherit", opacity:checking?0.7:1 }}>
+            {checking ? "A redirecionar..." : "Subscrever agora — €4/mês →"}
+          </button>
+        </div>
+        <div style={{ fontSize:12, color:T.textMuted, marginBottom:16 }}>Cancela quando quiseres · Sem compromissos</div>
+        <button onClick={onLogout} style={{ background:"transparent", border:"none", color:T.textMuted, fontSize:12, cursor:"pointer", textDecoration:"underline", fontFamily:"inherit" }}>
+          Sair ({email})
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ── AUTH ──────────────────────────────────────────────────────────────────────
-function AuthScreen({ initialModo = "login" }) {
+function AuthScreen({ initialModo = "login", paymentSuccess = false }) {
   const [modo, setModo] = useState(initialModo);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -710,7 +751,8 @@ function AuthScreen({ initialModo = "login" }) {
               <input type="password" value={password} onChange={e=>setPassword(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleSubmit()} placeholder="••••••••" style={inp} />
             </div>
 
-            {erro && <div style={{ background:T.redBg, border:`1px solid ${T.redBorder}`, borderRadius:10, padding:"10px 14px", color:T.red, fontSize:13, marginBottom:14 }}>{erro}</div>}
+            {paymentSuccess && <div style={{ background:"#f0fdf4", border:"1px solid #86EFAC", borderRadius:10, padding:"10px 14px", color:"#16A34A", fontSize:13, marginBottom:14, fontWeight:600 }}>✓ Pagamento confirmado! Cria a tua conta para entrar.</div>}
+          {erro && <div style={{ background:T.redBg, border:`1px solid ${T.redBorder}`, borderRadius:10, padding:"10px 14px", color:T.red, fontSize:13, marginBottom:14 }}>{erro}</div>}
             {sucesso && <div style={{ background:T.greenBg, border:`1px solid ${T.greenBorder}`, borderRadius:10, padding:"10px 14px", color:T.green, fontSize:13, marginBottom:14 }}>{sucesso}</div>}
 
             <button onClick={handleSubmit} disabled={loading}
@@ -792,6 +834,8 @@ function OnboardingScreen({ userId, onComplete }) {
 export default function App() {
   const [session, setSession] = useState(undefined);
   const [authModo, setAuthModo] = useState(null); // null = landing, 'login'/'registo' = auth form
+  const [checkingOut, setCheckingOut] = useState(false);
+  const [landingCheckout, setLandingCheckout] = useState(false);
   const [profile, setProfile] = useState(undefined);
   const [profileLoading, setProfileLoading] = useState(true);
   const [entries, setEntries] = useState([]);
@@ -870,6 +914,7 @@ export default function App() {
   function resetForm() { setForm({ date:TODAY, revenue:"", cog:"", ads_fb:"", ads2:"", ads3:"", refunds:"" }); setEditId(null); }
 
   async function handleUpgrade() {
+    setCheckingOut(true);
     try {
       const res = await fetch('/api/create-checkout', {
         method: 'POST',
@@ -878,9 +923,27 @@ export default function App() {
       });
       const data = await res.json();
       if (data.url) window.location.href = data.url;
-      else alert('Erro ao iniciar pagamento. Tenta novamente.');
+      else { alert('Erro ao iniciar pagamento. Tenta novamente.'); setCheckingOut(false); }
     } catch (err) {
       alert('Erro de ligação. Tenta novamente.');
+      setCheckingOut(false);
+    }
+  }
+
+  async function handleLandingCheckout() {
+    setLandingCheckout(true);
+    try {
+      const res = await fetch('/api/create-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fromLanding: true }),
+      });
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+      else { alert('Erro ao iniciar pagamento. Tenta novamente.'); setLandingCheckout(false); }
+    } catch (err) {
+      alert('Erro de ligação. Tenta novamente.');
+      setLandingCheckout(false);
     }
   }
 
@@ -965,10 +1028,16 @@ export default function App() {
     </div>
   );
   if (!session) {
-    if (authModo === null) return <LandingPage onStart={(m) => setAuthModo(m)} />;
-    return <AuthScreen initialModo={authModo} />;
+    // After Stripe payment, redirect to register
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("payment") === "success") {
+      if (authModo === null) setAuthModo("registo");
+    }
+    if (authModo === null) return <LandingPage onStart={(m) => setAuthModo(m)} onCheckout={handleLandingCheckout} checking={landingCheckout} />;
+    return <AuthScreen initialModo={authModo} paymentSuccess={new URLSearchParams(window.location.search).get("payment") === "success"} />;
   }
   if (profile === false) return <OnboardingScreen userId={session.user.id} onComplete={p => setProfile(p)} />;
+
 
   const storeName = profile?.store_name || "A minha loja";
   const logoUrl = profile?.logo_url;
