@@ -208,7 +208,8 @@ function OnboardingScreen({ userId, onComplete }) {
 export default function App() {
   const [session, setSession] = useState(null);
   const [loadingAuth, setLoadingAuth] = useState(true);
-  const [profile, setProfile] = useState(null);
+  const [profile, setProfile] = useState(undefined);
+  const [profileLoading, setProfileLoading] = useState(true);
   const [entries, setEntries] = useState([]);
   const [loadingData, setLoadingData] = useState(false);
   const [tab, setTab] = useState("home");
@@ -237,8 +238,10 @@ export default function App() {
   }, [session]);
 
   async function loadProfile() {
+    setProfileLoading(true);
     const { data } = await supabase.from("profiles").select("*").eq("id", session.user.id).single();
-    setProfile(data);
+    setProfile(data || false);
+    setProfileLoading(false);
   }
 
   async function loadEntries() {
@@ -301,8 +304,8 @@ export default function App() {
 
   if (loadingAuth) return <div style={{ minHeight: "100vh", background: T.bg, display: "flex", alignItems: "center", justifyContent: "center" }}><div style={{ color: T.textMuted, fontFamily: "sans-serif", fontSize: 14 }}>A carregar...</div></div>;
   if (!session) return <AuthScreen />;
-  if (profile === null) return <div style={{ minHeight: "100vh", background: T.bg }} />;
-  if (!profile) return <OnboardingScreen userId={session.user.id} onComplete={p => setProfile(p)} />;
+  if (profileLoading) return <div style={{ minHeight: "100vh", background: T.bg }} />;
+  if (profile === false) return <OnboardingScreen userId={session.user.id} onComplete={p => setProfile(p)} />;
 
   const storeName = profile.store_name || "A minha loja";
   const logoUrl = profile.logo_url;
