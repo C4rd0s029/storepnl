@@ -1181,36 +1181,84 @@ export default function App() {
               <button onClick={()=>{resetForm();setTab("add");}} style={{ background:T.text, border:"none", borderRadius:12, padding:"12px 24px", color:"#fff", fontSize:14, fontWeight:700, cursor:"pointer" }}>+ Adicionar dia</button>
             </div>
           ) : (
-            <div style={{ padding:"16px" }}>
-              <div style={{ ...card, padding:"20px", marginBottom:12 }}>
-                <div style={{ color:T.textMuted, fontSize:11, fontWeight:600, letterSpacing:"0.06em", textTransform:"uppercase", marginBottom:12 }}>Este Mês</div>
-                <div style={{ display:"flex", justifyContent:"space-between" }}>
-                  <div><div style={{ color:T.textMuted, fontSize:12, marginBottom:4 }}>Faturação</div><div style={{ color:T.text, fontSize:24, fontWeight:800, fontFamily:mono }}>{eur(thisMes.rev)}</div></div>
-                  <div style={{ textAlign:"right" }}><div style={{ color:T.textMuted, fontSize:12, marginBottom:4 }}>Lucro</div><div style={{ color:thisMes.prof>=0?T.green:T.red, fontSize:24, fontWeight:800, fontFamily:mono }}>{eur(thisMes.prof)}</div></div>
-                </div>
-              </div>
+            <div style={{ padding:"12px 16px" }}>
+              {(() => {
+                const t = todayStats.today;
+                const y = todayStats.yesterday;
+                const display = t || todayStats.lastEntry;
+                const isToday = !!t;
+                if (!display) return null;
+                const profDelta = delta(t, y, "profit");
+                const revDelta = delta(t, y, "revenue");
+                const adsDelta = delta(t, y, "ads");
+                return (
+                  <>
+                    {/* Hero */}
+                    <div style={{ background:display.profit>=0?"#f0fdf4":"#fef2f2", border:`1px solid ${display.profit>=0?T.greenBorder:T.redBorder}`, borderRadius:16, padding:"20px", marginBottom:10 }}>
+                      <div style={{ color:T.textMuted, fontSize:11, fontWeight:600, letterSpacing:"0.06em", textTransform:"uppercase", marginBottom:6 }}>
+                        {isToday ? "Hoje" : `Último dia — ${fmtDate(display.date)}`}
+                      </div>
+                      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-end" }}>
+                        <div style={{ color:display.profit>=0?T.green:T.red, fontSize:38, fontWeight:800, fontFamily:mono, letterSpacing:"-0.03em" }}>{eur(display.profit)}</div>
+                        {profDelta && (
+                          <div style={{ textAlign:"right" }}>
+                            <div style={{ fontSize:11, color:T.textMuted }}>vs ontem</div>
+                            <div style={{ fontSize:16, fontWeight:800, color:profDelta.up?T.green:T.red, fontFamily:mono }}>{profDelta.up?"↑":"↓"} {eur(Math.abs(profDelta.diff))}</div>
+                          </div>
+                        )}
+                      </div>
+                      <div style={{ color:T.textMuted, fontSize:12, marginTop:6 }}>{pct(display.margin)} margem · ROAS {display.roas?display.roas.toFixed(2)+"x":"—"}</div>
+                    </div>
 
-              <div style={{ ...card, padding:"18px 16px 10px", marginBottom:12 }}>
-                <div style={{ color:T.textMuted, fontSize:11, fontWeight:600, letterSpacing:"0.06em", textTransform:"uppercase", marginBottom:12 }}>30 dias</div>
-                <ResponsiveContainer width="100%" height={130}>
+                    {/* Rev + Ads */}
+                    <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, marginBottom:8 }}>
+                      {[
+                        ["Faturação", eur(display.revenue), T.blue, revDelta],
+                        ["Adspend", eur(display.ads), T.amber, adsDelta],
+                      ].map(([l,v,c,d]) => (
+                        <div key={l} style={{ ...card, padding:"14px 16px" }}>
+                          <div style={{ color:T.textMuted, fontSize:11, fontWeight:600, textTransform:"uppercase", letterSpacing:"0.05em", marginBottom:6 }}>{l}</div>
+                          <div style={{ color:c, fontSize:20, fontWeight:800, fontFamily:mono }}>{v}</div>
+                          {d && <div style={{ fontSize:11, color:d.up?T.green:T.red, marginTop:4 }}>{d.up?"↑":"↓"} {eur(Math.abs(d.diff))}</div>}
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* COG + Refunds */}
+                    <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, marginBottom:12 }}>
+                      {[["COG", eur(display.cog), T.purple],["Devoluções", eur(display.refunds), T.red]].map(([l,v,c]) => (
+                        <div key={l} style={{ ...card, padding:"12px 16px", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+                          <span style={{ color:T.textMuted, fontSize:12 }}>{l}</span>
+                          <span style={{ color:c, fontSize:14, fontWeight:700, fontFamily:mono }}>{v}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                );
+              })()}
+
+              {/* Chart */}
+              <div style={{ ...card, padding:"16px 14px 10px", marginBottom:12 }}>
+                <div style={{ color:T.textMuted, fontSize:11, fontWeight:600, letterSpacing:"0.06em", textTransform:"uppercase", marginBottom:10 }}>Lucro — 30 dias</div>
+                <ResponsiveContainer width="100%" height={120}>
                   <BarChart data={homeChart} barSize={homeChart.length>20?5:10} margin={{top:4,right:4,left:0,bottom:0}}>
                     <XAxis dataKey="date" tick={{fill:T.textLight,fontSize:9}} axisLine={false} tickLine={false} interval="preserveStartEnd" />
-                    <YAxis tick={{fill:T.textLight,fontSize:9}} axisLine={false} tickLine={false} tickFormatter={v=>"€"+v} width={44} />
+                    <YAxis tick={{fill:T.textLight,fontSize:9}} axisLine={false} tickLine={false} tickFormatter={v=>"€"+v} width={40} />
                     <Tooltip content={<ChartTip />} cursor={{fill:"rgba(0,0,0,0.02)"}} />
                     <ReferenceLine y={0} stroke={T.border} />
-                    <Bar dataKey="profit" radius={[4,4,0,0]}>{homeChart.map((e,i)=><Cell key={i} fill={e.profit>=0?"#86EFAC":"#FCA5A5"} />)}</Bar>
+                    <Bar dataKey="profit" radius={[3,3,0,0]}>{homeChart.map((e,i)=><Cell key={i} fill={e.profit>=0?"#86EFAC":"#FCA5A5"} />)}</Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </div>
 
-              <div style={{ color:T.textMuted, fontSize:11, fontWeight:600, letterSpacing:"0.06em", textTransform:"uppercase", marginBottom:10, paddingLeft:2 }}>Dias Recentes</div>
+              {/* Recent days */}
+              <div style={{ color:T.textMuted, fontSize:11, fontWeight:600, letterSpacing:"0.06em", textTransform:"uppercase", marginBottom:8, paddingLeft:2 }}>Dias Recentes</div>
               {all.slice(0,60).map(r=>(
-                <div key={r.id} onClick={()=>{setSelected(r);setTab("detalhe");}} style={{ ...card, padding:"14px 18px", marginBottom:8, display:"flex", justifyContent:"space-between", alignItems:"center", cursor:"pointer" }}>
-                  <div><div style={{ fontSize:14, fontWeight:600, marginBottom:3 }}>{fmtDate(r.date)}</div><div style={{ color:T.textMuted, fontSize:12 }}>{eur(r.revenue)} · {eur(r.ads)} ads</div></div>
-                  <div style={{ textAlign:"right" }}><div style={{ color:r.profit>=0?T.green:T.red, fontSize:15, fontWeight:700, fontFamily:mono }}>{eur(r.profit)}</div><div style={{ color:T.textMuted, fontSize:11, marginTop:2 }}>{pct(r.margin)}</div></div>
+                <div key={r.id} onClick={()=>{setSelected(r);setTab("detalhe");}} style={{ ...card, padding:"13px 16px", marginBottom:6, display:"flex", justifyContent:"space-between", alignItems:"center", cursor:"pointer" }}>
+                  <div><div style={{ fontSize:14, fontWeight:600, marginBottom:2 }}>{fmtDate(r.date)}</div><div style={{ color:T.textMuted, fontSize:12 }}>{eur(r.revenue)} · {eur(r.ads)} ads</div></div>
+                  <div style={{ textAlign:"right" }}><div style={{ color:r.profit>=0?T.green:T.red, fontSize:15, fontWeight:700, fontFamily:mono }}>{eur(r.profit)}</div><div style={{ color:T.textMuted, fontSize:11, marginTop:1 }}>{pct(r.margin)}</div></div>
                 </div>
               ))}
-
             </div>
           )}
         </div>
