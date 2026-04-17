@@ -238,6 +238,12 @@ export default function App() {
   const [tab, setTab] = useState("home");
   const [selected, setSelected] = useState(null);
   const [editId, setEditId] = useState(null);
+  const [settingsName, setSettingsName] = useState("");
+  const [settingsLogo, setSettingsLogo] = useState(null);
+  const [settingsLogoPreview, setSettingsLogoPreview] = useState(null);
+  const [settingsSaving, setSettingsSaving] = useState(false);
+  const [settingsSaved, setSettingsSaved] = useState(false);
+  const settingsFileRef = useRef();
   const [statFilter, setStatFilter] = useState("mes");
   const [statValue, setStatValue] = useState(() => ({ mes: new Date().getMonth(), quarter:"Q2", ano: new Date().getFullYear() }));
   const [form, setForm] = useState({ date:TODAY, revenue:"", cog:"", ads_fb:"", ads2:"", ads3:"", refunds:"" });
@@ -294,6 +300,33 @@ export default function App() {
     setEditId(r.id); setTab("add");
   }
   function resetForm() { setForm({ date:TODAY, revenue:"", cog:"", ads_fb:"", ads2:"", ads3:"", refunds:"" }); setEditId(null); }
+
+  async function handleSettingsSave() {
+    setSettingsSaving(true);
+    let logo_url = profile?.logo_url || null;
+    if (settingsLogo) {
+      const ext = settingsLogo.name.split(".").pop();
+      const path = `${session.user.id}/logo.${ext}`;
+      const { error: upErr } = await supabase.storage.from("logos").upload(path, settingsLogo, { upsert: true });
+      if (!upErr) {
+        const { data } = supabase.storage.from("logos").getPublicUrl(path);
+        logo_url = data.publicUrl;
+      }
+    }
+    const name = settingsName.trim() || profile?.store_name;
+    await supabase.from("profiles").upsert({ id: session.user.id, store_name: name, logo_url });
+    setProfile({ ...profile, store_name: name, logo_url });
+    setSettingsSaving(false);
+    setSettingsSaved(true);
+    setTimeout(() => setSettingsSaved(false), 2000);
+  }
+
+  function handleSettingsLogo(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    setSettingsLogo(file);
+    setSettingsLogoPreview(URL.createObjectURL(file));
+  }
   const f = k => e => setForm(p => ({ ...p, [k]:e.target.value }));
 
   const all = useMemo(() => entries.map(calc), [entries]);
@@ -344,6 +377,7 @@ export default function App() {
     { id:"home", label:"Dashboard", icon:"▦" },
     { id:"analytics", label:"Analytics", icon:"◈" },
     { id:"add", label:"Adicionar Dia", icon:"+" },
+    { id:"definicoes", label:"Definições", icon:"⚙" },
   ];
 
   // ── DESKTOP LAYOUT ─────────────────────────────────────────────────────────
@@ -634,6 +668,56 @@ export default function App() {
               </div>
             </div>
           )}
+
+          {/* DEFINICOES */}
+          {tab==="definicoes" && (
+            <div style={{ maxWidth:520 }}>
+              <div style={{ marginBottom:28 }}>
+                <div style={{ fontSize:26, fontWeight:800, letterSpacing:"-0.03em", marginBottom:4 }}>Definições</div>
+                <div style={{ color:T.textMuted, fontSize:14 }}>Personaliza a tua loja</div>
+              </div>
+              <div style={{ ...card, padding:"28px" }}>
+                {/* Logo */}
+                <div style={{ marginBottom:24 }}>
+                  <div style={{ color:T.textMuted, fontSize:11, fontWeight:600, letterSpacing:"0.06em", textTransform:"uppercase", marginBottom:12 }}>Logo da Loja</div>
+                  <div style={{ display:"flex", alignItems:"center", gap:16 }}>
+                    <div onClick={() => settingsFileRef.current.click()} style={{ width:72, height:72, borderRadius:16, background:settingsLogoPreview||logoUrl?"transparent":T.bg, border:`2px dashed ${T.border}`, display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer", overflow:"hidden", flexShrink:0 }}>
+                      {settingsLogoPreview
+                        ? <img src={settingsLogoPreview} alt="logo" style={{ width:"100%", height:"100%", objectFit:"cover" }} />
+                        : logoUrl
+                          ? <img src={logoUrl} alt="logo" style={{ width:"100%", height:"100%", objectFit:"cover" }} />
+                          : <span style={{ fontSize:24 }}>🏪</span>
+                      }
+                    </div>
+                    <div>
+                      <button onClick={() => settingsFileRef.current.click()} style={{ background:T.bg, border:`1px solid ${T.border}`, borderRadius:8, padding:"8px 16px", fontSize:13, fontWeight:600, cursor:"pointer", color:T.text, marginBottom:6, display:"block" }}>Alterar logo</button>
+                      <div style={{ color:T.textMuted, fontSize:12 }}>PNG, JPG ou GIF. Max 2MB.</div>
+                    </div>
+                    <input ref={settingsFileRef} type="file" accept="image/*" onChange={handleSettingsLogo} style={{ display:"none" }} />
+                  </div>
+                </div>
+
+                {/* Name */}
+                <div style={{ marginBottom:24 }}>
+                  <div style={{ color:T.textMuted, fontSize:11, fontWeight:600, letterSpacing:"0.06em", textTransform:"uppercase", marginBottom:6 }}>Nome da Loja</div>
+                  <input type="text" value={settingsName} onChange={e=>setSettingsName(e.target.value)}
+                    placeholder={profile?.store_name || "Nome da tua loja"}
+                    style={{ width:"100%", background:T.bg, border:`1.5px solid ${T.border}`, borderRadius:10, padding:"12px 14px", color:T.text, fontSize:15, outline:"none", fontFamily:"inherit" }} />
+                </div>
+
+                <button onClick={handleSettingsSave} disabled={settingsSaving}
+                  style={{ background:settingsSaved?"#16A34A":T.text, border:"none", borderRadius:12, padding:"13px 28px", color:"#fff", fontSize:14, fontWeight:700, cursor:"pointer", transition:"background 0.2s" }}>
+                  {settingsSaved?"✓ Guardado!":settingsSaving?"A guardar...":"Guardar alterações"}
+                </button>
+              </div>
+
+              <div style={{ ...card, padding:"24px", marginTop:16 }}>
+                <div style={{ color:T.textMuted, fontSize:11, fontWeight:600, letterSpacing:"0.06em", textTransform:"uppercase", marginBottom:12 }}>Conta</div>
+                <div style={{ color:T.textMuted, fontSize:13, marginBottom:14 }}>{session.user.email}</div>
+                <button onClick={() => supabase.auth.signOut()} style={{ background:T.redBg, border:`1px solid ${T.redBorder}`, borderRadius:10, padding:"10px 20px", color:T.red, fontSize:13, fontWeight:600, cursor:"pointer" }}>Sair da conta</button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -698,7 +782,7 @@ export default function App() {
                   <div style={{ textAlign:"right" }}><div style={{ color:r.profit>=0?T.green:T.red, fontSize:15, fontWeight:700, fontFamily:mono }}>{eur(r.profit)}</div><div style={{ color:T.textMuted, fontSize:11, marginTop:2 }}>{pct(r.margin)}</div></div>
                 </div>
               ))}
-              <button onClick={()=>supabase.auth.signOut()} style={{ width:"100%", background:"transparent", border:`1px solid ${T.border}`, borderRadius:12, padding:"11px", color:T.textMuted, fontSize:13, cursor:"pointer", marginTop:8 }}>Sair da conta</button>
+
             </div>
           )}
         </div>
@@ -819,9 +903,52 @@ export default function App() {
         </div>
       )}
 
+
+      {tab==="definicoes" && (
+        <div style={{ paddingBottom:90 }}>
+          <div style={{ background:T.surface, borderBottom:`1px solid ${T.border}`, padding:"52px 20px 16px" }}>
+            <div style={{ fontSize:22, fontWeight:800 }}>Definições</div>
+          </div>
+          <div style={{ padding:"16px" }}>
+            <div style={{ ...card, padding:"22px", marginBottom:12 }}>
+              <div style={{ color:T.textMuted, fontSize:11, fontWeight:600, letterSpacing:"0.06em", textTransform:"uppercase", marginBottom:14 }}>Logo da Loja</div>
+              <div style={{ display:"flex", alignItems:"center", gap:14, marginBottom:4 }}>
+                <div onClick={() => settingsFileRef.current.click()} style={{ width:64, height:64, borderRadius:14, background:"transparent", border:`2px dashed ${T.border}`, display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer", overflow:"hidden", flexShrink:0 }}>
+                  {settingsLogoPreview
+                    ? <img src={settingsLogoPreview} alt="logo" style={{ width:"100%", height:"100%", objectFit:"cover" }} />
+                    : logoUrl
+                      ? <img src={logoUrl} alt="logo" style={{ width:"100%", height:"100%", objectFit:"cover" }} />
+                      : <span style={{ fontSize:22 }}>🏪</span>
+                  }
+                </div>
+                <button onClick={() => settingsFileRef.current.click()} style={{ background:T.bg, border:`1px solid ${T.border}`, borderRadius:8, padding:"9px 16px", fontSize:13, fontWeight:600, cursor:"pointer", color:T.text }}>Alterar logo</button>
+                <input ref={settingsFileRef} type="file" accept="image/*" onChange={handleSettingsLogo} style={{ display:"none" }} />
+              </div>
+            </div>
+
+            <div style={{ ...card, padding:"22px", marginBottom:12 }}>
+              <div style={{ color:T.textMuted, fontSize:11, fontWeight:600, letterSpacing:"0.06em", textTransform:"uppercase", marginBottom:8 }}>Nome da Loja</div>
+              <input type="text" value={settingsName} onChange={e=>setSettingsName(e.target.value)}
+                placeholder={profile?.store_name || "Nome da tua loja"}
+                style={{ width:"100%", background:T.bg, border:`1.5px solid ${T.border}`, borderRadius:10, padding:"12px 14px", color:T.text, fontSize:15, outline:"none", fontFamily:"inherit" }} />
+            </div>
+
+            <button onClick={handleSettingsSave} disabled={settingsSaving}
+              style={{ width:"100%", background:settingsSaved?"#16A34A":T.text, border:"none", borderRadius:12, padding:"14px", color:"#fff", fontSize:15, fontWeight:700, cursor:"pointer", marginBottom:10, transition:"background 0.2s" }}>
+              {settingsSaved?"✓ Guardado!":settingsSaving?"A guardar...":"Guardar alterações"}
+            </button>
+
+            <div style={{ ...card, padding:"18px 20px" }}>
+              <div style={{ color:T.textMuted, fontSize:12, marginBottom:12 }}>{session.user.email}</div>
+              <button onClick={() => supabase.auth.signOut()} style={{ width:"100%", background:T.redBg, border:`1px solid ${T.redBorder}`, borderRadius:10, padding:"11px", color:T.red, fontSize:13, fontWeight:600, cursor:"pointer" }}>Sair da conta</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {tab!=="add" && tab!=="detalhe" && (
         <div style={{ position:"fixed", bottom:0, left:"50%", transform:"translateX(-50%)", width:"100%", maxWidth:430, background:T.surface, borderTop:`1px solid ${T.border}`, padding:"10px 0 28px", display:"flex" }}>
-          {[["home","▦","Início"],["analytics","◈","Analytics"]].map(([t,icon,label])=>(
+          {[["home","▦","Início"],["analytics","◈","Analytics"],["definicoes","⚙","Config"]].map(([t,icon,label])=>(
             <button key={t} onClick={()=>setTab(t)} style={{ background:"none", border:"none", cursor:"pointer", display:"flex", flexDirection:"column", alignItems:"center", gap:3, flex:1 }}>
               <span style={{ fontSize:20, color:tab===t?T.text:T.textLight }}>{icon}</span>
               <span style={{ fontSize:10, fontWeight:700, color:tab===t?T.text:T.textLight, letterSpacing:"0.06em", textTransform:"uppercase" }}>{label}</span>
