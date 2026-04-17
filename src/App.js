@@ -403,9 +403,234 @@ function MobileAddForm({ form, setForm, editId, saving, preview, onSave, onBack,
   );
 }
 
+
+// ── LANDING PAGE ─────────────────────────────────────────────────────────────
+function LandingPage({ onStart }) {
+  const isMobile = useIsMobile();
+
+  const S = {
+    bg: "#F8F7F5", surface: "#FFFFFF", border: "#EBEBEB",
+    text: "#1A1A1A", muted: "#8A8A8A", light: "#C4C4C4",
+    green: "#16A34A", greenBg: "#F0FDF4", greenBorder: "#86EFAC",
+    mono: "'DM Mono','Courier New',monospace",
+  };
+
+  return (
+    <div style={{ minHeight:"100vh", background:S.bg, fontFamily:"'DM Sans',sans-serif", color:S.text }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap');
+        * { box-sizing:border-box; margin:0; padding:0; }
+        html { scroll-behavior: smooth; }
+        .lp-feature:hover { border-color: #D4D4D4 !important; }
+        .lp-faq { cursor:pointer; }
+        .lp-faq-answer { display:none; }
+        .lp-faq.open .lp-faq-answer { display:block; }
+      `}</style>
+
+      {/* NAV */}
+      <nav style={{ position:"fixed", top:0, left:0, right:0, zIndex:100, background:"rgba(248,247,245,0.92)", backdropFilter:"blur(12px)", borderBottom:`1px solid ${S.border}`, padding:"0 24px", height:60, display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+        <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+          <div style={{ width:34, height:34, background:S.text, borderRadius:10, display:"flex", alignItems:"center", justifyContent:"center" }}>
+            <div style={{ display:"flex", alignItems:"flex-end", gap:2, height:16 }}>
+              {[6,9,12,16].map((h,i) => <div key={i} style={{ width:4, height:h, background:"#4ade80", borderRadius:"2px 2px 0 0", opacity:[0.3,0.5,0.75,1][i] }} />)}
+            </div>
+          </div>
+          <span style={{ fontSize:16, fontWeight:800, letterSpacing:"-0.02em" }}>StorePNL</span>
+        </div>
+        <button onClick={() => onStart("login")} style={{ background:S.text, color:"#fff", border:"none", borderRadius:8, padding:"8px 18px", fontSize:13, fontWeight:700, cursor:"pointer", fontFamily:"inherit" }}>Entrar</button>
+      </nav>
+
+      {/* HERO */}
+      <div style={{ minHeight:"100vh", paddingTop:60, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", textAlign:"center", padding:"80px 24px 60px" }}>
+        <div style={{ display:"inline-flex", alignItems:"center", gap:6, background:S.surface, border:`1px solid ${S.border}`, borderRadius:20, padding:"6px 14px", fontSize:12, fontWeight:600, color:S.muted, marginBottom:28 }}>
+          <div style={{ width:6, height:6, background:S.green, borderRadius:"50%" }} />
+          Para lojas Shopify
+        </div>
+
+        <h1 style={{ fontSize:isMobile?"38px":"68px", fontWeight:800, letterSpacing:"-0.04em", lineHeight:1.05, marginBottom:20, maxWidth:760 }}>
+          Para de adivinhar.<br/>Sabe o teu{" "}
+          <span style={{ color:S.green }}>lucro real</span><br/>
+          todos os dias.
+        </h1>
+
+        <p style={{ fontSize:isMobile?"16px":"19px", color:S.muted, maxWidth:500, marginBottom:36, lineHeight:1.6 }}>
+          O StorePNL substitui o teu Excel de P&L por uma dashboard limpa, rápida e sempre no teu bolso.
+        </p>
+
+        <div style={{ display:"flex", gap:12, flexWrap:"wrap", justifyContent:"center", marginBottom:14 }}>
+          <button onClick={() => onStart("registo")} style={{ background:S.text, color:"#fff", border:"none", borderRadius:12, padding:"14px 28px", fontSize:16, fontWeight:700, cursor:"pointer", fontFamily:"inherit" }}>
+            Começar agora — €4/mês
+          </button>
+          <a href="#features" style={{ background:S.surface, color:S.text, border:`1px solid ${S.border}`, borderRadius:12, padding:"14px 28px", fontSize:16, fontWeight:600, cursor:"pointer", textDecoration:"none" }}>
+            Ver como funciona
+          </a>
+        </div>
+        <div style={{ fontSize:12, color:S.light }}>Cancela quando quiseres · Sem compromissos</div>
+
+        {/* App mockup */}
+        <div style={{ width:"100%", maxWidth:320, marginTop:52, background:S.surface, border:`1px solid ${S.border}`, borderRadius:24, overflow:"hidden", boxShadow:"0 24px 60px rgba(0,0,0,0.09)" }}>
+          <div style={{ background:S.surface, borderBottom:`1px solid ${S.border}`, padding:"14px 18px", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+            <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+              <div style={{ width:30, height:30, background:S.text, borderRadius:8, display:"flex", alignItems:"center", justifyContent:"center", color:"#fff", fontSize:11, fontWeight:800 }}>M</div>
+              <div><div style={{ fontSize:12, fontWeight:700 }}>A minha loja</div><div style={{ fontSize:9, color:S.muted }}>Dashboard P&L</div></div>
+            </div>
+            <div style={{ background:S.text, color:"#fff", borderRadius:7, padding:"5px 10px", fontSize:10, fontWeight:700 }}>+ Dia</div>
+          </div>
+          <div style={{ padding:12 }}>
+            <div style={{ background:S.greenBg, border:`1px solid ${S.greenBorder}`, borderRadius:12, padding:14, marginBottom:8 }}>
+              <div style={{ fontSize:9, fontWeight:700, color:S.muted, letterSpacing:"0.08em", textTransform:"uppercase", marginBottom:3 }}>Hoje</div>
+              <div style={{ fontFamily:S.mono, fontSize:28, fontWeight:800, color:S.green, letterSpacing:"-0.03em" }}>€127.43</div>
+              <div style={{ fontSize:9, color:S.muted, marginTop:3 }}>38.2% margem · ROAS 2.8x</div>
+            </div>
+            <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:6, marginBottom:8 }}>
+              {[["Faturação","€334.00","#2563EB","↑ €42"],[" Adspend","€89.50","#D97706","↑ €12"]].map(([l,v,c,d])=>(
+                <div key={l} style={{ background:S.surface, border:`1px solid ${S.border}`, borderRadius:8, padding:"9px 10px" }}>
+                  <div style={{ fontSize:8, fontWeight:700, color:S.muted, textTransform:"uppercase", letterSpacing:"0.06em" }}>{l}</div>
+                  <div style={{ fontFamily:S.mono, fontSize:14, fontWeight:800, color:c, marginTop:3 }}>{v}</div>
+                  <div style={{ fontSize:8, color:S.green, marginTop:2 }}>{d} vs ontem</div>
+                </div>
+              ))}
+            </div>
+            <div style={{ background:S.surface, border:`1px solid ${S.border}`, borderRadius:8, padding:"9px 10px" }}>
+              <div style={{ fontSize:8, fontWeight:700, color:S.muted, textTransform:"uppercase", letterSpacing:"0.06em", marginBottom:6 }}>30 dias</div>
+              <div style={{ display:"flex", alignItems:"flex-end", gap:2, height:32 }}>
+                {[40,30,55,45,70,80,60,35,90,75,85,100].map((h,i)=>(
+                  <div key={i} style={{ flex:1, height:`${h}%`, background:h>50?"#86EFAC":"#FCA5A5", borderRadius:"2px 2px 0 0" }} />
+                ))}
+              </div>
+            </div>
+          </div>
+          <div style={{ borderTop:`1px solid ${S.border}`, padding:"8px 0 14px", display:"flex", justifyContent:"space-around" }}>
+            {[["▦","Início",true],["◈","Analytics",false],["⚙","Config",false]].map(([icon,label,active])=>(
+              <div key={label} style={{ textAlign:"center" }}>
+                <div style={{ fontSize:16, color:active?S.text:S.light }}>{icon}</div>
+                <div style={{ fontSize:8, fontWeight:700, color:active?S.text:S.light, letterSpacing:"0.06em", textTransform:"uppercase" }}>{label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* FEATURES */}
+      <div id="features" style={{ background:S.surface, borderTop:`1px solid ${S.border}`, borderBottom:`1px solid ${S.border}`, padding:"72px 24px" }}>
+        <div style={{ maxWidth:1000, margin:"0 auto" }}>
+          <div style={{ textAlign:"center", marginBottom:48 }}>
+            <div style={{ fontSize:11, fontWeight:700, color:S.muted, letterSpacing:"0.1em", textTransform:"uppercase", marginBottom:10 }}>Como funciona</div>
+            <h2 style={{ fontSize:isMobile?"28px":"40px", fontWeight:800, letterSpacing:"-0.03em", marginBottom:12 }}>Tudo o que precisas.<br/>Nada do que não usas.</h2>
+            <p style={{ fontSize:16, color:S.muted, maxWidth:460, margin:"0 auto" }}>Criado por um lojista Shopify que estava farto de Excel.</p>
+          </div>
+          <div style={{ display:"grid", gridTemplateColumns:`repeat(${isMobile?1:3}, 1fr)`, gap:14 }}>
+            {[
+              ["⚡","Registo em segundos","Faturação, adspend, custos. Em 30 segundos sabes se hoje foi verde ou vermelho."],
+              ["📊","Lucro real","Vê o lucro líquido depois de COG, adspend, taxas e devoluções. Sem surpresas."],
+              ["📈","Compara com ontem","Cada dia mostra a comparação automática com o anterior. Sabes se estás a melhorar."],
+              ["📱","Mobile first","Instala no iPhone como app. Abre em 2 segundos, sem browser, sem login todas as vezes."],
+              ["📁","Importa o teu Excel","Tens um P&L Sheet? Faz upload directo e tudo aparece na dashboard em segundos."],
+              ["🏪","A tua marca","Adiciona o logo e nome da tua loja. A dashboard fica personalizada só para ti."],
+            ].map(([icon,title,desc])=>(
+              <div key={title} className="lp-feature" style={{ background:S.bg, border:`1px solid ${S.border}`, borderRadius:16, padding:24, transition:"border 0.15s" }}>
+                <div style={{ fontSize:26, marginBottom:12 }}>{icon}</div>
+                <div style={{ fontSize:16, fontWeight:700, marginBottom:8 }}>{title}</div>
+                <div style={{ fontSize:13, color:S.muted, lineHeight:1.6 }}>{desc}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* STORY */}
+      <div style={{ padding:"72px 24px" }}>
+        <div style={{ maxWidth:620, margin:"0 auto", background:S.surface, border:`1px solid ${S.border}`, borderRadius:22, padding:isMobile?"24px":"44px" }}>
+          <p style={{ fontSize:isMobile?"18px":"22px", fontWeight:500, lineHeight:1.5, letterSpacing:"-0.01em", marginBottom:24 }}>
+            "Estava a gerir a minha loja com um Excel enorme que demorava imenso a actualizar. Nunca sabia exactamente{" "}
+            <span style={{ color:S.green, fontWeight:700 }}>quanto estava a ganhar</span>{" "}
+            depois de todos os custos. Construí o StorePNL para mim — e percebi que toda a gente precisava disto."
+          </p>
+          <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+            <div style={{ width:42, height:42, background:S.text, borderRadius:"50%", display:"flex", alignItems:"center", justifyContent:"center", color:"#fff", fontSize:15, fontWeight:800, flexShrink:0 }}>L</div>
+            <div>
+              <div style={{ fontSize:14, fontWeight:700 }}>Luís — Fundador do StorePNL</div>
+              <div style={{ fontSize:12, color:S.muted }}>Lojista Shopify · Criador de conteúdo de e-commerce</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* PRICING */}
+      <div style={{ background:S.surface, borderTop:`1px solid ${S.border}`, borderBottom:`1px solid ${S.border}`, padding:"72px 24px" }}>
+        <div style={{ maxWidth:400, margin:"0 auto", textAlign:"center" }}>
+          <div style={{ fontSize:11, fontWeight:700, color:S.muted, letterSpacing:"0.1em", textTransform:"uppercase", marginBottom:10 }}>Preço</div>
+          <h2 style={{ fontSize:isMobile?"28px":"40px", fontWeight:800, letterSpacing:"-0.03em", marginBottom:12 }}>Simples como devia ser.</h2>
+          <p style={{ fontSize:16, color:S.muted, marginBottom:40 }}>Um plano. Um preço. Sem surpresas.</p>
+          <div style={{ background:S.text, borderRadius:20, padding:"32px 28px", color:"#fff", textAlign:"left" }}>
+            <div style={{ fontSize:12, fontWeight:700, letterSpacing:"0.08em", textTransform:"uppercase", color:"rgba(255,255,255,0.5)", marginBottom:12 }}>StorePNL</div>
+            <div style={{ fontFamily:S.mono, fontSize:52, fontWeight:800, letterSpacing:"-0.04em", marginBottom:4 }}>€4</div>
+            <div style={{ fontSize:13, color:"rgba(255,255,255,0.5)", marginBottom:24 }}>por mês · cancela quando quiseres</div>
+            <ul style={{ listStyle:"none", marginBottom:28 }}>
+              {["Dashboard completa","Registo diário em segundos","Comparação vs ontem","Analytics por período","Import de Excel","Logo e nome da loja","Mobile + Desktop","Sincronização multi-dispositivo"].map(f=>(
+                <li key={f} style={{ fontSize:14, padding:"7px 0", borderBottom:"1px solid rgba(255,255,255,0.1)", display:"flex", alignItems:"center", gap:8 }}>
+                  <span style={{ color:"#4ade80", fontWeight:700 }}>✓</span> {f}
+                </li>
+              ))}
+            </ul>
+            <button onClick={() => onStart("registo")} style={{ width:"100%", background:"#fff", border:"none", borderRadius:12, padding:14, fontSize:15, fontWeight:700, cursor:"pointer", fontFamily:"inherit", color:S.text }}>
+              Começar agora →
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* FAQ */}
+      <div style={{ padding:"72px 24px" }}>
+        <div style={{ maxWidth:600, margin:"0 auto" }}>
+          <div style={{ textAlign:"center", marginBottom:40 }}>
+            <div style={{ fontSize:11, fontWeight:700, color:S.muted, letterSpacing:"0.1em", textTransform:"uppercase", marginBottom:10 }}>FAQ</div>
+            <h2 style={{ fontSize:isMobile?"28px":"36px", fontWeight:800, letterSpacing:"-0.03em" }}>Tens dúvidas?</h2>
+          </div>
+          {[
+            ["Preciso de ligar a minha loja Shopify?", "Não. O StorePNL é manual — tu inseris os dados que queres. Não acede à tua loja, não precisa de permissões. Simples e rápido."],
+            ["Os meus dados são privados?", "Sim. Cada conta é completamente isolada. Os teus dados só são acessíveis por ti, protegidos por autenticação segura."],
+            ["Posso cancelar quando quiser?", "Sim, sem qualquer penalização. Cancelas a qualquer momento."],
+            ["Funciona para outras plataformas?", "Por agora focamos em Shopify, mas como é inserção manual podes usar para qualquer loja."],
+            ["Tenho dados no Excel, consigo importar?", "Sim! Nas Definições há um botão de import directo de ficheiros .xlsx. Em segundos tens o histórico completo."],
+          ].map(([q,a],i) => (
+            <div key={i} className="lp-faq" style={{ background:S.surface, border:`1px solid ${S.border}`, borderRadius:14, padding:"18px 22px", marginBottom:8 }}
+              onClick={e => e.currentTarget.classList.toggle("open")}>
+              <div style={{ fontSize:15, fontWeight:600, display:"flex", justifyContent:"space-between", alignItems:"center", gap:12 }}>
+                {q} <span style={{ color:S.muted, fontSize:12, flexShrink:0 }}>▼</span>
+              </div>
+              <div className="lp-faq-answer" style={{ fontSize:14, color:S.muted, marginTop:12, lineHeight:1.6 }}>{a}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* CTA BOTTOM */}
+      <div style={{ background:S.text, borderRadius:24, padding:isMobile?"40px 20px":"64px 32px", textAlign:"center", margin:`0 ${isMobile?"12px":"24px"} 80px`, maxWidth:900, marginLeft:"auto", marginRight:"auto" }}>
+        <h2 style={{ fontSize:isMobile?"28px":"44px", fontWeight:800, color:"#fff", letterSpacing:"-0.03em", marginBottom:12 }}>Começa hoje.<br/>€4/mês.</h2>
+        <p style={{ color:"rgba(255,255,255,0.5)", fontSize:16, marginBottom:32 }}>Junta-te a lojistas que já sabem exactamente quanto ganham todos os dias.</p>
+        <button onClick={() => onStart("registo")} style={{ background:"#fff", color:S.text, border:"none", borderRadius:12, padding:"14px 32px", fontSize:16, fontWeight:700, cursor:"pointer", fontFamily:"inherit" }}>
+          Começar agora →
+        </button>
+        <p style={{ color:"rgba(255,255,255,0.3)", fontSize:12, marginTop:14 }}>€4/mês · Cancela quando quiseres · Sem compromissos</p>
+      </div>
+
+      {/* FOOTER */}
+      <div style={{ borderTop:`1px solid ${S.border}`, padding:"24px", display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:12, maxWidth:1100, margin:"0 auto" }}>
+        <div style={{ fontSize:13, color:S.muted }}>© 2026 StorePNL · Feito em Portugal 🇵🇹</div>
+        <div style={{ display:"flex", gap:20 }}>
+          {["Termos","Privacidade","Contacto"].map(l=>(
+            <a key={l} href="#" style={{ fontSize:13, color:S.muted, textDecoration:"none" }}>{l}</a>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── AUTH ──────────────────────────────────────────────────────────────────────
-function AuthScreen() {
-  const [modo, setModo] = useState(() => window.location.search.includes("registo") ? "registo" : "login");
+function AuthScreen({ initialModo = "login" }) {
+  const [modo, setModo] = useState(initialModo);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -566,6 +791,7 @@ function OnboardingScreen({ userId, onComplete }) {
 // ── MAIN APP ──────────────────────────────────────────────────────────────────
 export default function App() {
   const [session, setSession] = useState(undefined);
+  const [authModo, setAuthModo] = useState(null); // null = landing, 'login'/'registo' = auth form
   const [profile, setProfile] = useState(undefined);
   const [profileLoading, setProfileLoading] = useState(true);
   const [entries, setEntries] = useState([]);
@@ -716,7 +942,10 @@ export default function App() {
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
     </div>
   );
-  if (!session) return <AuthScreen />;
+  if (!session) {
+    if (authModo === null) return <LandingPage onStart={(m) => setAuthModo(m)} />;
+    return <AuthScreen initialModo={authModo} />;
+  }
   if (profile === false) return <OnboardingScreen userId={session.user.id} onComplete={p => setProfile(p)} />;
 
   const storeName = profile?.store_name || "A minha loja";
