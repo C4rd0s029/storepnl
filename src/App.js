@@ -158,7 +158,7 @@ export default function App() {
   async function loadEntries() {
     setLoadingData(true);
     const { data, error } = await supabase
-      .from("entries")
+      .from("Storepnl")
       .select("*")
       .eq("user_id", session.user.id)
       .order("date", { ascending: false });
@@ -179,9 +179,9 @@ export default function App() {
       refunds: n(form.refunds),
     };
     if (editId) {
-      await supabase.from("entries").update(payload).eq("id", editId);
+      await supabase.from("Storepnl").update(payload).eq("id", editId);
     } else {
-      await supabase.from("entries").insert(payload);
+      await supabase.from("Storepnl").insert(payload);
     }
     await loadEntries();
     resetForm();
@@ -190,7 +190,7 @@ export default function App() {
   }
 
   async function handleDelete(id) {
-    await supabase.from("entries").delete().eq("id", id);
+    await supabase.from("Storepnl").delete().eq("id", id);
     await loadEntries();
     setTab("home");
     setDeleteConfirm(false);
