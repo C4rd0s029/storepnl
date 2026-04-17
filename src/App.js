@@ -521,9 +521,9 @@ function OnboardingScreen({ userId, onComplete }) {
     if (logoFile) {
       const ext = logoFile.name.split(".").pop();
       const path = `${userId}/logo.${ext}`;
-      const { error: upErr } = await supabase.storage.from("logos").upload(path, logoFile, { upsert: true });
+      const { error: upErr } = await supabase.storage.from("Logos").upload(path, logoFile, { upsert: true });
       if (!upErr) {
-        const { data } = supabase.storage.from("logos").getPublicUrl(path);
+        const { data } = supabase.storage.from("Logos").getPublicUrl(path);
         logo_url = data.publicUrl;
       }
     }
@@ -642,9 +642,9 @@ export default function App() {
     if (settingsLogo) {
       const ext = settingsLogo.name.split(".").pop();
       const path = `${session.user.id}/logo.${ext}`;
-      const { error: upErr } = await supabase.storage.from("logos").upload(path, settingsLogo, { upsert: true });
+      const { error: upErr } = await supabase.storage.from("Logos").upload(path, settingsLogo, { upsert: true });
       if (!upErr) {
-        const { data } = supabase.storage.from("logos").getPublicUrl(path);
+        const { data } = supabase.storage.from("Logos").getPublicUrl(path);
         logo_url = data.publicUrl;
       }
     }
