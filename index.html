@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StorePNL — O teu P&L diário para Shopify</title>
+<meta name="description" content="Para de usar Excel. Vê o teu lucro real todos os dias, em segundos. Criado por um lojista, para lojistas.">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F8F7F5;
+    --surface: #FFFFFF;
+    --border: #EBEBEB;
+    --text: #1A1A1A;
+    --muted: #8A8A8A;
+    --light: #C4C4C4;
+    --green: #16A34A;
+    --green-bg: #F0FDF4;
+    --green-border: #86EFAC;
+    --red: #DC2626;
+    --red-bg: #FEF2F2;
+    --amber: #D97706;
+  }
+
+  html { scroll-behavior: smooth; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(248,247,245,0.92); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px; height: 60px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+  .logo-icon {
+    width: 34px; height: 34px; background: var(--text); border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .logo-bars { display: flex; align-items: flex-end; gap: 2px; height: 16px; }
+  .logo-bars span {
+    width: 4px; background: #4ade80; border-radius: 2px 2px 0 0;
+    display: block;
+  }
+  .logo-name { font-size: 16px; font-weight: 800; letter-spacing: -0.02em; color: var(--text); }
+  .nav-cta {
+    background: var(--text); color: #fff; border: none;
+    border-radius: 8px; padding: 8px 18px; font-size: 13px; font-weight: 700;
+    cursor: pointer; text-decoration: none; font-family: inherit;
+    transition: opacity 0.15s;
+  }
+  .nav-cta:hover { opacity: 0.85; }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh; padding-top: 60px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding-left: 20px; padding-right: 20px;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; padding: 6px 14px; font-size: 12px; font-weight: 600;
+    color: var(--muted); margin-bottom: 28px;
+  }
+  .hero-badge span { width: 6px; height: 6px; background: var(--green); border-radius: 50%; display: block; }
+  .hero-title {
+    font-size: clamp(36px, 7vw, 72px); font-weight: 800;
+    letter-spacing: -0.04em; line-height: 1.05; margin-bottom: 20px;
+    max-width: 800px;
+  }
+  .hero-title em { font-style: normal; color: var(--green); }
+  .hero-sub {
+    font-size: clamp(16px, 2.5vw, 20px); color: var(--muted);
+    max-width: 520px; margin-bottom: 36px; font-weight: 400; line-height: 1.6;
+  }
+  .hero-cta-group { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 60px; }
+  .btn-primary {
+    background: var(--text); color: #fff; border: none;
+    border-radius: 12px; padding: 14px 28px; font-size: 16px; font-weight: 700;
+    cursor: pointer; text-decoration: none; font-family: inherit; transition: opacity 0.15s;
+  }
+  .btn-primary:hover { opacity: 0.85; }
+  .btn-secondary {
+    background: var(--surface); color: var(--text); border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px 28px; font-size: 16px; font-weight: 600;
+    cursor: pointer; text-decoration: none; font-family: inherit;
+  }
+  .hero-note { font-size: 12px; color: var(--light); margin-top: -8px; }
+
+  /* APP MOCKUP */
+  .mockup-wrap {
+    width: 100%; max-width: 340px; margin: 0 auto;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 28px; overflow: hidden;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.10), 0 4px 16px rgba(0,0,0,0.06);
+  }
+  .mockup-header {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 16px 20px; display: flex; justify-content: space-between; align-items: center;
+  }
+  .mockup-store { display: flex; align-items: center; gap: 8px; }
+  .mockup-logo-dot {
+    width: 32px; height: 32px; background: var(--text); border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 12px; font-weight: 800;
+  }
+  .mockup-store-name { font-size: 13px; font-weight: 700; }
+  .mockup-store-sub { font-size: 10px; color: var(--muted); }
+  .mockup-add-btn {
+    background: var(--text); color: #fff; border: none;
+    border-radius: 8px; padding: 7px 12px; font-size: 11px; font-weight: 700;
+  }
+  .mockup-body { padding: 14px; }
+  .mockup-hero-card {
+    background: var(--green-bg); border: 1px solid var(--green-border);
+    border-radius: 14px; padding: 16px; margin-bottom: 10px;
+  }
+  .mockup-label { font-size: 9px; font-weight: 700; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 4px; }
+  .mockup-profit { font-family: 'DM Mono', monospace; font-size: 30px; font-weight: 800; color: var(--green); letter-spacing: -0.03em; }
+  .mockup-meta { font-size: 10px; color: var(--muted); margin-top: 4px; }
+  .mockup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+  .mockup-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px 12px;
+  }
+  .mockup-val { font-family: 'DM Mono', monospace; font-size: 15px; font-weight: 800; margin-top: 4px; }
+  .mockup-delta { font-size: 9px; margin-top: 2px; }
+  .mockup-chart {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px 12px;
+  }
+  .chart-bars { display: flex; align-items: flex-end; gap: 3px; height: 40px; margin-top: 8px; }
+  .chart-bars div { flex: 1; border-radius: 2px 2px 0 0; }
+  .mockup-nav {
+    background: var(--surface); border-top: 1px solid var(--border);
+    padding: 10px 0 16px; display: flex; justify-content: space-around;
+  }
+  .mockup-nav-item { text-align: center; font-size: 9px; font-weight: 700; color: var(--light); }
+  .mockup-nav-item.active { color: var(--text); }
+  .mockup-nav-icon { font-size: 16px; display: block; margin-bottom: 2px; }
+
+  /* SECTION */
+  section { padding: 80px 20px; }
+  .container { max-width: 1100px; margin: 0 auto; }
+  .section-label {
+    font-size: 11px; font-weight: 700; color: var(--muted);
+    letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px;
+    text-align: center;
+  }
+  .section-title {
+    font-size: clamp(28px, 4vw, 44px); font-weight: 800;
+    letter-spacing: -0.03em; line-height: 1.1; text-align: center;
+    margin-bottom: 16px;
+  }
+  .section-sub {
+    font-size: 17px; color: var(--muted); text-align: center;
+    max-width: 500px; margin: 0 auto 56px;
+  }
+
+  /* FEATURES */
+  .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+  .feature-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 18px; padding: 28px;
+  }
+  .feature-icon { font-size: 28px; margin-bottom: 14px; display: block; }
+  .feature-title { font-size: 17px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.01em; }
+  .feature-desc { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+  /* STORY */
+  .story-wrap {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 24px; padding: 48px;
+    max-width: 680px; margin: 0 auto;
+  }
+  .story-quote {
+    font-size: clamp(18px, 3vw, 24px); font-weight: 500;
+    line-height: 1.5; letter-spacing: -0.01em; margin-bottom: 28px;
+  }
+  .story-quote em { font-style: normal; color: var(--green); font-weight: 700; }
+  .story-author { display: flex; align-items: center; gap: 12px; }
+  .story-avatar {
+    width: 44px; height: 44px; background: var(--text); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 16px; font-weight: 800;
+  }
+  .story-name { font-size: 14px; font-weight: 700; }
+  .story-role { font-size: 12px; color: var(--muted); }
+
+  /* PRICING */
+  .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; max-width: 640px; margin: 0 auto; }
+  .pricing-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; padding: 32px 28px;
+  }
+  .pricing-card.featured {
+    background: var(--text); border-color: var(--text); color: #fff;
+  }
+  .pricing-plan { font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 12px; color: var(--muted); }
+  .pricing-card.featured .pricing-plan { color: rgba(255,255,255,0.6); }
+  .pricing-price { font-size: 48px; font-weight: 800; letter-spacing: -0.04em; font-family: 'DM Mono', monospace; margin-bottom: 4px; }
+  .pricing-period { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
+  .pricing-card.featured .pricing-period { color: rgba(255,255,255,0.5); }
+  .pricing-features { list-style: none; margin-bottom: 28px; }
+  .pricing-features li { font-size: 14px; padding: 7px 0; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+  .pricing-card.featured .pricing-features li { border-bottom-color: rgba(255,255,255,0.1); }
+  .pricing-features li::before { content: "✓"; font-weight: 700; color: var(--green); flex-shrink: 0; }
+  .pricing-card.featured .pricing-features li::before { color: #4ade80; }
+  .pricing-btn {
+    width: 100%; padding: 13px; border-radius: 12px; border: none;
+    font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit;
+    text-decoration: none; display: block; text-align: center;
+  }
+  .pricing-btn-outline { background: transparent; border: 1px solid var(--border) !important; color: var(--text); }
+  .pricing-btn-white { background: #fff; color: var(--text); }
+
+  /* FAQ */
+  .faq-list { max-width: 640px; margin: 0 auto; }
+  .faq-item {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 20px 24px; margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .faq-q { font-size: 15px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
+  .faq-a { font-size: 14px; color: var(--muted); margin-top: 12px; line-height: 1.6; display: none; }
+  .faq-item.open .faq-a { display: block; }
+  .faq-item.open .faq-arrow { transform: rotate(180deg); }
+  .faq-arrow { transition: transform 0.2s; font-size: 12px; color: var(--muted); flex-shrink: 0; }
+
+  /* CTA BOTTOM */
+  .cta-bottom {
+    background: var(--text); border-radius: 24px;
+    padding: 64px 32px; text-align: center; margin: 0 16px 80px;
+    max-width: 900px; margin-left: auto; margin-right: auto;
+  }
+  .cta-bottom h2 { font-size: clamp(28px, 4vw, 44px); font-weight: 800; color: #fff; letter-spacing: -0.03em; margin-bottom: 12px; }
+  .cta-bottom p { color: rgba(255,255,255,0.5); font-size: 16px; margin-bottom: 32px; }
+  .cta-bottom .btn-white { background: #fff; color: var(--text); border: none; border-radius: 12px; padding: 14px 32px; font-size: 16px; font-weight: 700; cursor: pointer; font-family: inherit; text-decoration: none; display: inline-block; }
+  .cta-note { color: rgba(255,255,255,0.3); font-size: 12px; margin-top: 14px; }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border); padding: 28px 24px;
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: gap;
+    max-width: 1100px; margin: 0 auto; gap: 12px; flex-wrap: wrap;
+  }
+  footer .footer-left { font-size: 13px; color: var(--muted); }
+  footer .footer-links { display: flex; gap: 20px; }
+  footer .footer-links a { font-size: 13px; color: var(--muted); text-decoration: none; }
+
+  @media (max-width: 640px) {
+    .story-wrap { padding: 28px 20px; }
+    .cta-bottom { padding: 40px 20px; margin: 0 12px 60px; }
+    section { padding: 60px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="logo">
+    <div class="logo-icon">
+      <div class="logo-bars">
+        <span style="height:6px; opacity:0.3"></span>
+        <span style="height:9px; opacity:0.5"></span>
+        <span style="height:12px; opacity:0.75"></span>
+        <span style="height:16px;"></span>
+      </div>
+    </div>
+    <span class="logo-name">StorePNL</span>
+  </a>
+  <a href="https://storepnl.vercel.app" class="nav-cta">Começar grátis →</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge"><span></span> Para lojas Shopify</div>
+  <h1 class="hero-title">Para de adivinhar.<br>Sabe o teu <em>lucro real</em><br>todos os dias.</h1>
+  <p class="hero-sub">O StorePNL substitui o teu Excel de P&L por uma dashboard limpa, rápida e sempre no teu bolso.</p>
+  <div class="hero-cta-group">
+    <a href="https://storepnl.vercel.app" class="btn-primary">Começar agora — €4/mês</a>
+    <a href="#como-funciona" class="btn-secondary">Ver como funciona</a>
+  </div>
+  <p class="hero-note">Cancela quando quiseres · €4/mês · Sem compromissos</p>
+
+  <!-- App mockup -->
+  <div class="mockup-wrap">
+    <div class="mockup-header">
+      <div class="mockup-store">
+        <div class="mockup-logo-dot">M</div>
+        <div>
+          <div class="mockup-store-name">A minha loja</div>
+          <div class="mockup-store-sub">Dashboard P&L</div>
+        </div>
+      </div>
+      <div class="mockup-add-btn">+ Dia</div>
+    </div>
+    <div class="mockup-body">
+      <div class="mockup-hero-card">
+        <div class="mockup-label">Hoje</div>
+        <div class="mockup-profit">€127.43</div>
+        <div class="mockup-meta">38.2% margem · ROAS 2.8x</div>
+      </div>
+      <div class="mockup-grid">
+        <div class="mockup-card">
+          <div class="mockup-label">Faturação</div>
+          <div class="mockup-val" style="color:#2563EB">€334.00</div>
+          <div class="mockup-delta" style="color:#16A34A">↑ €42 vs ontem</div>
+        </div>
+        <div class="mockup-card">
+          <div class="mockup-label">Adspend</div>
+          <div class="mockup-val" style="color:#D97706">€89.50</div>
+          <div class="mockup-delta" style="color:#DC2626">↑ €12 vs ontem</div>
+        </div>
+      </div>
+      <div class="mockup-chart">
+        <div class="mockup-label">30 dias</div>
+        <div class="chart-bars">
+          <div style="height:40%; background:#FCA5A5"></div>
+          <div style="height:30%; background:#FCA5A5"></div>
+          <div style="height:55%; background:#86EFAC"></div>
+          <div style="height:45%; background:#FCA5A5"></div>
+          <div style="height:70%; background:#86EFAC"></div>
+          <div style="height:80%; background:#86EFAC"></div>
+          <div style="height:60%; background:#86EFAC"></div>
+          <div style="height:35%; background:#FCA5A5"></div>
+          <div style="height:90%; background:#86EFAC"></div>
+          <div style="height:75%; background:#86EFAC"></div>
+          <div style="height:85%; background:#86EFAC"></div>
+          <div style="height:100%; background:#86EFAC"></div>
+        </div>
+      </div>
+    </div>
+    <div class="mockup-nav">
+      <div class="mockup-nav-item active"><span class="mockup-nav-icon">▦</span>Início</div>
+      <div class="mockup-nav-item"><span class="mockup-nav-icon">◈</span>Analytics</div>
+      <div class="mockup-nav-item"><span class="mockup-nav-icon">⚙</span>Config</div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="como-funciona" style="background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+  <div class="container">
+    <div class="section-label">Como funciona</div>
+    <h2 class="section-title">Tudo o que precisas.<br>Nada do que não usas.</h2>
+    <p class="section-sub">Criado por um lojista Shopify que estava farto de Excel.</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <span class="feature-icon">⚡</span>
+        <div class="feature-title">Registo diário em segundos</div>
+        <p class="feature-desc">Abre a app, insere faturação, adspend e custos. Em 30 segundos já sabes se hoje foi um dia verde ou vermelho.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">📊</span>
+        <div class="feature-title">Lucro real, não receita</div>
+        <p class="feature-desc">Vê o teu lucro líquido depois de descontar COG, adspend, taxas Shopify e devoluções. Sem surpresas no fim do mês.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">📈</span>
+        <div class="feature-title">Compara com ontem</div>
+        <p class="feature-desc">Cada dia mostra automaticamente a comparação com o dia anterior. Sabes imediatamente se estás a melhorar.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">📱</span>
+        <div class="feature-title">Mobile first</div>
+        <p class="feature-desc">Instalas no ecrã inicial do iPhone como app. Abre em 2 segundos, sem browser, sem login todas as vezes.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">📁</span>
+        <div class="feature-title">Importa o teu Excel</div>
+        <p class="feature-desc">Tens dados históricos num P&L Sheet? Faz upload directo e tudo aparece na dashboard em segundos.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🏪</span>
+        <div class="feature-title">A tua marca, a tua dashboard</div>
+        <p class="feature-desc">Adiciona o logo e o nome da tua loja. A dashboard fica personalizada e parece que foi feita só para ti.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STORY -->
+<section>
+  <div class="container">
+    <div class="section-label">A história</div>
+    <div class="story-wrap">
+      <p class="story-quote">
+        "Estava a gerir a minha loja Shopify com um Excel enorme que demorava imenso a actualizar. Nunca sabia exactamente <em>quanto estava a ganhar</em> depois de todos os custos. Construí o StorePNL para mim — e percebi que toda a gente precisava disto."
+      </p>
+      <div class="story-author">
+        <div class="story-avatar">L</div>
+        <div>
+          <div class="story-name">Luís — Fundador do StorePNL</div>
+          <div class="story-role">Lojista Shopify · Criador de conteúdo de e-commerce</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section style="background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+  <div class="container">
+    <div class="section-label">Preços</div>
+    <h2 class="section-title">Simples como devia ser.</h2>
+    <p class="section-sub">Um plano. Um preço. Sem surpresas.</p>
+    <div class="pricing-grid" style="grid-template-columns:1fr; max-width:400px;">
+      <div class="pricing-card featured" style="max-width:360px; margin:0 auto;">
+        <div class="pricing-plan">StorePNL</div>
+        <div class="pricing-price">€4</div>
+        <div class="pricing-period">por mês · cancela quando quiseres</div>
+        <ul class="pricing-features">
+          <li>Dashboard completa</li>
+          <li>Registo diário em segundos</li>
+          <li>Comparação vs ontem</li>
+          <li>Analytics por mês/trimestre/ano</li>
+          <li>Import de Excel</li>
+          <li>Logo e nome da loja</li>
+          <li>Mobile + Desktop</li>
+          <li>Sincronização multi-dispositivo</li>
+        </ul>
+        <a href="https://storepnl.vercel.app" class="pricing-btn pricing-btn-white">Começar agora →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section>
+  <div class="container">
+    <div class="section-label">Perguntas frequentes</div>
+    <h2 class="section-title">Tens dúvidas?</h2>
+    <p class="section-sub" style="margin-bottom:40px">Temos respostas.</p>
+    <div class="faq-list">
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q">Preciso de ligar a minha loja Shopify? <span class="faq-arrow">▼</span></div>
+        <div class="faq-a">Não. O StorePNL é manual — tu inseris os dados que queres acompanhar. Não acede à tua loja, não precisa de permissões, não tem integrações complexas. Simples e rápido.</div>
+      </div>
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q">Os meus dados são privados? <span class="faq-arrow">▼</span></div>
+        <div class="faq-a">Sim. Cada conta é completamente isolada. Os teus dados só são acessíveis por ti, protegidos por autenticação segura. Nunca partilhamos ou vendemos dados.</div>
+      </div>
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q">Posso cancelar quando quiser? <span class="faq-arrow">▼</span></div>
+        <div class="faq-a">Sim, sem qualquer penalização. Cancelas quando quiseres a qualquer momento. Sem perguntas, sem penalizações.</div>
+      </div>
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q">Funciona para outras plataformas além do Shopify? <span class="faq-arrow">▼</span></div>
+        <div class="faq-a">Por agora estamos focados em lojistas Shopify, mas como é inserção manual, podes usá-lo para qualquer loja. O produto vai evoluir com o feedback dos utilizadores.</div>
+      </div>
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q">Tenho dados no Excel, consigo importar? <span class="faq-arrow">▼</span></div>
+        <div class="faq-a">Sim! O StorePNL aceita import directo de ficheiros .xlsx no formato P&L Sheet padrão. Nas Definições há um botão de import — em segundos tens o histórico completo na dashboard.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA BOTTOM -->
+<div class="cta-bottom">
+  <h2>Começa hoje.<br>€4/mês.</h2>
+  <p>Junta-te a lojistas que já sabem exactamente quanto ganham todos os dias.</p>
+  <a href="https://storepnl.vercel.app" class="btn-white">Começar agora →</a>
+  <p class="cta-note">€4/mês · Cancela quando quiseres · Sem compromissos</p>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-left">© 2026 StorePNL · Feito em Portugal 🇵🇹</div>
+  <div class="footer-links">
+    <a href="#">Termos</a>
+    <a href="#">Privacidade</a>
+    <a href="mailto:hello@storepnl.com">Contacto</a>
+  </div>
+</footer>
+
+<script>
+  function toggleFaq(el) {
+    el.classList.toggle('open');
+  }
+</script>
+</body>
+</html>
