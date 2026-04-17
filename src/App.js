@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine, Cell } from "recharts";
 import { supabase } from "./supabaseClient";
+import * as XLSX from "xlsx";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const n = (v) => parseFloat(String(v).replace(",", ".")) || 0;
@@ -68,6 +69,216 @@ function ChartTip({ active, payload, label }) {
   );
 }
 
+
+
+// ── EXCEL IMPORT ─────────────────────────────────────────────────────────────
+function ExcelImport({ userId, onImportDone, T }) {
+  const [preview, setPreview] = useState(null);
+  const [importing, setImporting] = useState(false);
+  const [done, setDone] = useState(null);
+  const [error, setError] = useState("");
+  const fileRef = useRef();
+
+  function excelDateToISO(serial) {
+    if (!serial || typeof serial !== "number") return null;
+    const date = new Date(Math.round((serial - 25569) * 86400 * 1000));
+    return date.toISOString().slice(0, 10);
+  }
+
+  function parseFile(e) {
+    setError(""); setPreview(null); setDone(null);
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const wb = XLSX.read(ev.target.result, { type: "array" });
+        const rows = [];
+        const monthSheets = wb.SheetNames.filter(n =>
+          ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC",
+           "JAN","FEV","MAR","ABR","MAI","JUN","JUL","AGO","SET","OUT","NOV","DEZ"].includes(n.toUpperCase().slice(0,3))
+        );
+        const sheets = monthSheets.length > 0 ? monthSheets : wb.SheetNames.slice(0, 12);
+
+        sheets.forEach(sheetName => {
+          const ws = wb.Sheets[sheetName];
+          const data = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "" });
+          if (data.length < 2) return;
+
+          // Find header row
+          let headerIdx = 0;
+          for (let i = 0; i < Math.min(5, data.length); i++) {
+            const row = data[i].map(c => String(c).toLowerCase());
+            if (row.some(c => c.includes("date") || c.includes("data") || c.includes("revenue") || c.includes("fatura"))) {
+              headerIdx = i; break;
+            }
+          }
+
+          const headers = data[headerIdx].map(h => String(h).toLowerCase().trim());
+          const getCol = (keywords) => {
+            for (const kw of keywords) {
+              const idx = headers.findIndex(h => h.includes(kw));
+              if (idx !== -1) return idx;
+            }
+            return -1;
+          };
+
+          const dateCol    = getCol(["date","data"]);
+          const revCol     = getCol(["revenue","receita","fatura","vendas"]);
+          const cogCol     = getCol(["cost of goods","cog","custo"]);
+          const adsFbCol   = getCol(["adspend fb","ads fb","facebook","meta","adspend"]);
+          const ads2Col    = getCol(["adspend 2","ads2","ads 2"]);
+          const ads3Col    = getCol(["adspend 3","ads3","ads 3"]);
+          const refundsCol = getCol(["refund","devoluc","return"]);
+
+          for (let i = headerIdx + 1; i < data.length; i++) {
+            const row = data[i];
+            const rawDate = row[dateCol];
+            if (!rawDate) continue;
+
+            const date = typeof rawDate === "number"
+              ? excelDateToISO(rawDate)
+              : String(rawDate).slice(0, 10);
+
+            if (!date || date < "2020-01-01") continue;
+
+            const revenue = parseFloat(row[revCol]) || 0;
+            const cog     = parseFloat(row[cogCol]) || 0;
+            const ads_fb  = parseFloat(row[adsFbCol]) || 0;
+            const ads2    = parseFloat(row[ads2Col]) || 0;
+            const ads3    = parseFloat(row[ads3Col]) || 0;
+            const refunds = parseFloat(row[refundsCol]) || 0;
+
+            if (revenue === 0 && ads_fb === 0 && cog === 0) continue;
+
+            rows.push({ user_id: userId, date, revenue, cog, ads_fb, ads2, ads3, refunds });
+          }
+        });
+
+        if (rows.length === 0) {
+          setError("Não encontrei dados válidos no ficheiro. Verifica se o Excel tem o formato correcto.");
+          return;
+        }
+
+        // Deduplicate by date
+        const unique = Object.values(rows.reduce((acc, r) => { acc[r.date] = r; return acc; }, {}));
+        unique.sort((a, b) => a.date.localeCompare(b.date));
+        setPreview(unique);
+      } catch (err) {
+        setError("Erro ao ler o ficheiro: " + err.message);
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  async function handleImport() {
+    if (!preview?.length) return;
+    setImporting(true);
+    // Delete existing entries for these dates first (upsert by date)
+    const dates = preview.map(r => r.date);
+    await supabase.from("Storepnl").delete().eq("user_id", userId).in("date", dates);
+    // Insert all
+    const { error: err } = await supabase.from("Storepnl").insert(preview);
+    if (err) { setError("Erro ao importar: " + err.message); }
+    else { setDone(preview.length); onImportDone(); }
+    setImporting(false);
+  }
+
+  return (
+    <div>
+      {!preview && !done && (
+        <div
+          onClick={() => fileRef.current.click()}
+          style={{ border:`2px dashed ${T.border}`, borderRadius:14, padding:"28px 20px", textAlign:"center", cursor:"pointer", background:T.bg, transition:"border 0.15s" }}>
+          <div style={{ fontSize:32, marginBottom:10 }}>📊</div>
+          <div style={{ fontSize:15, fontWeight:700, color:T.text, marginBottom:4 }}>Importar Excel / P&L</div>
+          <div style={{ fontSize:13, color:T.textMuted }}>Clica para seleccionar o ficheiro .xlsx</div>
+          <div style={{ fontSize:11, color:T.textLight, marginTop:8 }}>Compatível com o formato P&L Sheet</div>
+          <input ref={fileRef} type="file" accept=".xlsx,.xls,.csv" onChange={parseFile} style={{ display:"none" }} />
+        </div>
+      )}
+
+      {error && (
+        <div style={{ background:T.redBg, border:`1px solid ${T.redBorder}`, borderRadius:12, padding:"14px 16px", color:T.red, fontSize:13, marginTop:12 }}>
+          {error}
+          <button onClick={() => { setError(""); if (fileRef.current) fileRef.current.value = ""; }}
+            style={{ display:"block", marginTop:8, background:"transparent", border:"none", color:T.red, fontSize:12, cursor:"pointer", textDecoration:"underline", padding:0 }}>
+            Tentar novamente
+          </button>
+        </div>
+      )}
+
+      {preview && !done && (
+        <div>
+          <div style={{ background:T.greenBg, border:`1px solid ${T.greenBorder}`, borderRadius:12, padding:"14px 16px", marginBottom:12 }}>
+            <div style={{ color:T.green, fontWeight:700, fontSize:14, marginBottom:2 }}>✓ Ficheiro lido com sucesso</div>
+            <div style={{ color:T.green, fontSize:13 }}>Encontrei <strong>{preview.length} dias</strong> com dados para importar.</div>
+          </div>
+
+          {/* Preview table */}
+          <div style={{ background:T.surface, border:`1px solid ${T.border}`, borderRadius:12, overflow:"hidden", marginBottom:12 }}>
+            <div style={{ padding:"12px 16px", borderBottom:`1px solid ${T.border}`, display:"flex", justifyContent:"space-between" }}>
+              <span style={{ fontSize:11, fontWeight:700, color:T.textMuted, textTransform:"uppercase", letterSpacing:"0.06em" }}>Pré-visualização</span>
+              <span style={{ fontSize:11, color:T.textMuted }}>primeiros 5 dias</span>
+            </div>
+            <div style={{ overflowX:"auto" }}>
+              <table style={{ width:"100%", borderCollapse:"collapse", fontSize:12 }}>
+                <thead>
+                  <tr style={{ background:T.bg }}>
+                    {["Data","Faturação","Ads","COG","Devol."].map(h => (
+                      <th key={h} style={{ padding:"8px 12px", textAlign:"left", color:T.textMuted, fontWeight:600, fontSize:11, whiteSpace:"nowrap" }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {preview.slice(0, 5).map((r, i) => (
+                    <tr key={i} style={{ borderTop:`1px solid ${T.border}` }}>
+                      <td style={{ padding:"8px 12px", fontWeight:600 }}>{r.date}</td>
+                      <td style={{ padding:"8px 12px", color:T.text }}>€{r.revenue.toFixed(2)}</td>
+                      <td style={{ padding:"8px 12px", color:T.amber }}>€{r.ads_fb.toFixed(2)}</td>
+                      <td style={{ padding:"8px 12px", color:T.purple }}>€{r.cog.toFixed(2)}</td>
+                      <td style={{ padding:"8px 12px", color:T.red }}>€{r.refunds.toFixed(2)}</td>
+                    </tr>
+                  ))}
+                  {preview.length > 5 && (
+                    <tr style={{ borderTop:`1px solid ${T.border}` }}>
+                      <td colSpan={5} style={{ padding:"8px 12px", color:T.textMuted, fontSize:12, textAlign:"center" }}>
+                        + {preview.length - 5} dias adicionais
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div style={{ display:"flex", gap:10 }}>
+            <button onClick={() => { setPreview(null); if(fileRef.current) fileRef.current.value=""; }}
+              style={{ flex:1, background:T.bg, border:`1px solid ${T.border}`, borderRadius:12, padding:"13px", color:T.textMuted, fontSize:14, fontWeight:600, cursor:"pointer" }}>
+              Cancelar
+            </button>
+            <button onClick={handleImport} disabled={importing}
+              style={{ flex:2, background:T.text, border:"none", borderRadius:12, padding:"13px", color:"#fff", fontSize:14, fontWeight:700, cursor:"pointer" }}>
+              {importing ? "A importar..." : `Importar ${preview.length} dias →`}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {done && (
+        <div style={{ background:T.greenBg, border:`1px solid ${T.greenBorder}`, borderRadius:12, padding:"20px", textAlign:"center" }}>
+          <div style={{ fontSize:32, marginBottom:8 }}>🎉</div>
+          <div style={{ color:T.green, fontWeight:800, fontSize:16, marginBottom:4 }}>{done} dias importados!</div>
+          <div style={{ color:T.green, fontSize:13, marginBottom:14 }}>Os dados já aparecem na tua dashboard.</div>
+          <button onClick={() => { setDone(null); setPreview(null); if(fileRef.current) fileRef.current.value=""; }}
+            style={{ background:"transparent", border:`1px solid ${T.greenBorder}`, borderRadius:8, padding:"8px 16px", color:T.green, fontSize:13, fontWeight:600, cursor:"pointer" }}>
+            Importar outro ficheiro
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
 
 // ── MOBILE ADD FORM ───────────────────────────────────────────────────────────
 function MobileAddForm({ form, setForm, editId, saving, preview, onSave, onBack, f, eur, pct, mono, T }) {
@@ -840,6 +1051,13 @@ export default function App() {
                 <div style={{ color:T.textMuted, fontSize:13, marginBottom:14 }}>{session.user.email}</div>
                 <button onClick={() => supabase.auth.signOut()} style={{ background:T.redBg, border:`1px solid ${T.redBorder}`, borderRadius:10, padding:"10px 20px", color:T.red, fontSize:13, fontWeight:600, cursor:"pointer" }}>Sair da conta</button>
               </div>
+
+              {/* Excel Import */}
+              <div style={{ ...card, padding:"24px", marginTop:16 }}>
+                <div style={{ color:T.textMuted, fontSize:11, fontWeight:600, letterSpacing:"0.06em", textTransform:"uppercase", marginBottom:4 }}>Importar Dados</div>
+                <div style={{ color:T.textMuted, fontSize:13, marginBottom:16 }}>Importa o teu ficheiro P&L Sheet (.xlsx) directamente para a dashboard.</div>
+                <ExcelImport userId={session.user.id} onImportDone={loadEntries} T={T} />
+              </div>
             </div>
           )}
         </div>
@@ -1041,9 +1259,15 @@ export default function App() {
               {settingsSaved?"✓ Guardado!":settingsSaving?"A guardar...":"Guardar alterações"}
             </button>
 
-            <div style={{ ...card, padding:"18px 20px" }}>
+            <div style={{ ...card, padding:"18px 20px", marginBottom:12 }}>
               <div style={{ color:T.textMuted, fontSize:12, marginBottom:12 }}>{session.user.email}</div>
               <button onClick={() => supabase.auth.signOut()} style={{ width:"100%", background:T.redBg, border:`1px solid ${T.redBorder}`, borderRadius:10, padding:"11px", color:T.red, fontSize:13, fontWeight:600, cursor:"pointer" }}>Sair da conta</button>
+            </div>
+
+            <div style={{ ...card, padding:"20px" }}>
+              <div style={{ color:T.textMuted, fontSize:11, fontWeight:600, letterSpacing:"0.06em", textTransform:"uppercase", marginBottom:4 }}>Importar Dados</div>
+              <div style={{ color:T.textMuted, fontSize:13, marginBottom:14 }}>Importa o teu ficheiro P&L Sheet (.xlsx).</div>
+              <ExcelImport userId={session.user.id} onImportDone={loadEntries} T={T} />
             </div>
           </div>
         </div>
