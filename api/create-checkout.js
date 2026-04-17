@@ -11,6 +11,7 @@ module.exports = async function handler(req, res) {
     const sessionParams = {
       mode: 'subscription',
       payment_method_types: ['card'],
+      allow_promotion_codes: true,
       line_items: [{
         price: process.env.REACT_APP_STRIPE_PRICE_ID,
         quantity: 1,
@@ -19,11 +20,7 @@ module.exports = async function handler(req, res) {
       cancel_url: `${req.headers.origin}/`,
     };
 
-    // From landing — no user yet, collect email in Stripe
-    if (fromLanding) {
-      sessionParams.success_url = `${req.headers.origin}/?payment=success`;
-    } else {
-      // From settings — user already exists
+    if (!fromLanding) {
       sessionParams.customer_email = email;
       sessionParams.metadata = { userId };
       sessionParams.subscription_data = { metadata: { userId } };
