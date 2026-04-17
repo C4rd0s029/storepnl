@@ -190,7 +190,7 @@ function OnboardingScreen({ userId, onComplete }) {
 
           <div style={{ marginBottom: 20 }}>
             <div style={{ color: T.textMuted, fontSize: 11, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 6 }}>Nome da loja</div>
-            <input type="text" value={storeName} onChange={e => setStoreName(e.target.value)} placeholder="Ex: Isadora Jewellery"
+            <input type="text" value={storeName} onChange={e => setStoreName(e.target.value)} placeholder="Nome da tua loja"
               style={{ width: "100%", background: T.bg, border: `1.5px solid ${T.border}`, borderRadius: 12, padding: "13px 16px", color: T.text, fontSize: 15, outline: "none", fontFamily: "inherit", boxSizing: "border-box" }} />
           </div>
 
