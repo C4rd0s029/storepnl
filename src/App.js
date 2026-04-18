@@ -592,6 +592,7 @@ function LandingPage({ onStart, onCheckout, checking }) {
             ["Os meus dados são privados?", "Sim. Cada conta é completamente isolada. Os teus dados só são acessíveis por ti, protegidos por autenticação segura."],
             ["Posso cancelar quando quiser?", "Sim, sem qualquer penalização. Cancelas a qualquer momento."],
             ["Funciona para outras plataformas?", "Por agora focamos em Shopify, mas como é inserção manual podes usar para qualquer loja."],
+            ["Como adiciono o StorePNL ao ecrã inicial do iPhone?", "É simples! 1. Abre o storepnl.com no Safari (tem de ser o Safari). 2. Toca no botão de partilha ↑ (o quadrado com a seta para cima, na barra de baixo). 3. Faz scroll e toca em \"Adicionar ao Ecrã de Início\". 4. Certifica-te que o toggle \"Open as Web App\" está DESLIGADO. 5. Toca em \"Adicionar\". Pronto — o atalho aparece no teu ecrã inicial e abre directamente o StorePNL no browser."],
             ["Tenho dados no Excel, consigo importar?", "Sim! Nas Definições há um botão de import directo de ficheiros .xlsx. Em segundos tens o histórico completo."],
           ].map(([q,a],i) => (
             <div key={i} className="lp-faq" style={{ background:S.surface, border:`1px solid ${S.border}`, borderRadius:14, padding:"18px 22px", marginBottom:8 }}
