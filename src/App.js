@@ -396,7 +396,7 @@ function MobileAddForm({ form, setForm, editId, saving, preview, onSave, onBack,
         )}
         <button onClick={onSave} disabled={saving}
           style={{ width:"100%", background:T.text, border:"none", borderRadius:14, padding:"16px", color:"#fff", fontSize:16, fontWeight:800, cursor:"pointer", letterSpacing:"-0.01em" }}>
-          {saving ? "A guardar..." : editId ? "Actualizar Dia" : "Guardar Dia"}
+          {saving ? "A guardar..." : editId ? "Atualizar Dia" : "Guardar Dia"}
         </button>
       </div>
     </div>
@@ -542,7 +542,7 @@ function LandingPage({ onStart, onCheckout, checking }) {
       <div style={{ padding:"72px 24px" }}>
         <div style={{ maxWidth:620, margin:"0 auto", background:S.surface, border:`1px solid ${S.border}`, borderRadius:22, padding:isMobile?"24px":"44px" }}>
           <p style={{ fontSize:isMobile?"18px":"22px", fontWeight:500, lineHeight:1.5, letterSpacing:"-0.01em", marginBottom:24 }}>
-            "Estava a gerir a minha loja com um Excel enorme que demorava imenso a actualizar. Nunca sabia exactamente{" "}
+            "Estava a gerir a minha loja com um Excel enorme que demorava imenso a atualizar. Nunca sabia exactamente{" "}
             <span style={{ color:S.green, fontWeight:700 }}>quanto estava a ganhar</span>{" "}
             depois de todos os custos. Construí o StorePNL para mim — e percebi que toda a gente precisava disto."
           </p>
@@ -1412,7 +1412,7 @@ export default function App() {
 
                 <button onClick={handleSave} disabled={saving}
                   style={{ width:"100%", background:T.text, border:"none", borderRadius:12, padding:"14px", color:"#fff", fontSize:15, fontWeight:700, cursor:"pointer", marginTop:20, letterSpacing:"-0.01em" }}>
-                  {saving?"A guardar...":editId?"Actualizar Dia":"Guardar Dia"}
+                  {saving?"A guardar...":editId?"Atualizar Dia":"Guardar Dia"}
                 </button>
               </div>
             </div>
