@@ -6,11 +6,11 @@ import * as XLSX from "xlsx";
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const n = (v) => parseFloat(String(v).replace(",", ".")) || 0;
 
-function calc(d) {
+function calc(d, txRate = 0.05) {
   const revenue = n(d.revenue), cog = n(d.cog);
   const ads = n(d.ads_fb) + n(d.ads2) + n(d.ads3);
   const refunds = n(d.refunds);
-  const tx = revenue * 0.05;
+  const tx = revenue * txRate;
   const profit = revenue - cog - ads - refunds - tx;
   const roas = ads > 0 ? revenue / ads : null;
   const margin = revenue > 0 ? profit / revenue : null;
@@ -852,6 +852,8 @@ export default function App() {
   const [selected, setSelected] = useState(null);
   const [editId, setEditId] = useState(null);
   const [settingsName, setSettingsName] = useState("");
+  const [settingsTxRate, setSettingsTxRate] = useState("");
+  const [txRate, setTxRate] = useState(0.05);
   const [settingsLogo, setSettingsLogo] = useState(null);
   const [settingsLogoPreview, setSettingsLogoPreview] = useState(null);
   const [settingsSaving, setSettingsSaving] = useState(false);
@@ -880,6 +882,7 @@ export default function App() {
     setProfileLoading(true);
     const { data } = await supabase.from("profiles").select("*").eq("id", session.user.id).single();
     setProfile(data || false);
+    if (data?.tx_rate) setTxRate(parseFloat(data.tx_rate));
     setProfileLoading(false);
 
     // Handle payment success redirect
@@ -968,7 +971,9 @@ export default function App() {
       }
     }
     const name = settingsName.trim() || profile?.store_name;
-    await supabase.from("profiles").upsert({ id: session.user.id, store_name: name, logo_url });
+    const newTxRate = settingsTxRate !== "" ? parseFloat(settingsTxRate.replace(",",".")) / 100 : (profile?.tx_rate || 0.05);
+    await supabase.from("profiles").upsert({ id: session.user.id, store_name: name, logo_url, tx_rate: newTxRate });
+    setTxRate(newTxRate);
     setProfile({ ...profile, store_name: name, logo_url });
     setSettingsSaving(false);
     setSettingsSaved(true);
@@ -983,7 +988,7 @@ export default function App() {
   }
   const f = k => e => setForm(p => ({ ...p, [k]:e.target.value }));
 
-  const all = useMemo(() => entries.map(calc), [entries]);
+  const all = useMemo(() => entries.map(d => calc(d, txRate)), [entries]);
 
   const statsData = useMemo(() => {
     const now = new Date();
@@ -1005,7 +1010,7 @@ export default function App() {
   }, [statsData]);
 
   const homeChart = useMemo(() => [...all].sort((a,b)=>new Date(a.date)-new Date(b.date)).slice(-30).map(r=>({ date:fmtDate(r.date), profit:r.profit })), [all]);
-  const preview = useMemo(() => (form.revenue||form.ads_fb)?calc(form):null, [form]);
+  const preview = useMemo(() => (form.revenue||form.ads_fb)?calc(form, txRate):null, [form]);
 
   const thisMes = useMemo(() => {
     const mes = all.filter(r => new Date(r.date+"T00:00:00").getMonth()===new Date().getMonth());
@@ -1339,7 +1344,7 @@ export default function App() {
 
           {/* DETALHE */}
           {tab==="detalhe" && selected && (() => {
-            const r = calc(selected);
+            const r = calc(selected, txRate);
             return (
               <div>
                 <div style={{ display:"flex", alignItems:"center", gap:14, marginBottom:28 }}>
@@ -1447,11 +1452,23 @@ export default function App() {
                 </div>
 
                 {/* Name */}
-                <div style={{ marginBottom:24 }}>
+                <div style={{ marginBottom:20 }}>
                   <div style={{ color:T.textMuted, fontSize:11, fontWeight:600, letterSpacing:"0.06em", textTransform:"uppercase", marginBottom:6 }}>Nome da Loja</div>
                   <input type="text" value={settingsName} onChange={e=>setSettingsName(e.target.value)}
                     placeholder={profile?.store_name || "Nome da tua loja"}
                     style={{ width:"100%", background:T.bg, border:`1.5px solid ${T.border}`, borderRadius:10, padding:"12px 14px", color:T.text, fontSize:15, outline:"none", fontFamily:"inherit" }} />
+                </div>
+
+                {/* Tx Rate */}
+                <div style={{ marginBottom:24 }}>
+                  <div style={{ color:T.textMuted, fontSize:11, fontWeight:600, letterSpacing:"0.06em", textTransform:"uppercase", marginBottom:6 }}>Taxa de Transacção (%)</div>
+                  <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                    <input type="text" inputMode="decimal" value={settingsTxRate} onChange={e=>setSettingsTxRate(e.target.value)}
+                      placeholder={`${(txRate*100).toFixed(1)}`}
+                      style={{ width:120, background:T.bg, border:`1.5px solid ${T.border}`, borderRadius:10, padding:"12px 14px", color:T.text, fontSize:15, outline:"none", fontFamily:"'DM Mono',monospace" }} />
+                    <span style={{ color:T.textMuted, fontSize:13 }}>% · actual: {(txRate*100).toFixed(1)}%</span>
+                  </div>
+                  <div style={{ color:T.textLight, fontSize:12, marginTop:6 }}>Taxa cobrada pelo Shopify por cada transacção. Por defeito 5%.</div>
                 </div>
 
                 <button onClick={handleSettingsSave} disabled={settingsSaving}
@@ -1593,7 +1610,7 @@ export default function App() {
       )}
 
       {tab==="detalhe" && selected && (() => {
-        const r = calc(selected);
+        const r = calc(selected, txRate);
         return (
           <div style={{ paddingBottom:90 }}>
             <div style={{ background:T.surface, borderBottom:`1px solid ${T.border}`, padding:"52px 20px 16px", display:"flex", alignItems:"center", gap:14 }}>
@@ -1714,6 +1731,17 @@ export default function App() {
               <input type="text" value={settingsName} onChange={e=>setSettingsName(e.target.value)}
                 placeholder={profile?.store_name || "Nome da tua loja"}
                 style={{ width:"100%", background:T.bg, border:`1.5px solid ${T.border}`, borderRadius:10, padding:"12px 14px", color:T.text, fontSize:15, outline:"none", fontFamily:"inherit" }} />
+            </div>
+
+            <div style={{ ...card, padding:"22px", marginBottom:12 }}>
+              <div style={{ color:T.textMuted, fontSize:11, fontWeight:600, letterSpacing:"0.06em", textTransform:"uppercase", marginBottom:8 }}>Taxa de Transacção</div>
+              <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:6 }}>
+                <input type="text" inputMode="decimal" value={settingsTxRate} onChange={e=>setSettingsTxRate(e.target.value)}
+                  placeholder={`${(txRate*100).toFixed(1)}`}
+                  style={{ width:100, background:T.bg, border:`1.5px solid ${T.border}`, borderRadius:10, padding:"12px 14px", color:T.text, fontSize:16, outline:"none", fontFamily:"'DM Mono',monospace" }} />
+                <span style={{ color:T.textMuted, fontSize:13 }}>% · actual: {(txRate*100).toFixed(1)}%</span>
+              </div>
+              <div style={{ color:T.textLight, fontSize:12 }}>Taxa do Shopify por transacção. Por defeito 5%.</div>
             </div>
 
             <button onClick={handleSettingsSave} disabled={settingsSaving}
