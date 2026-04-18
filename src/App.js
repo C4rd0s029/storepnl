@@ -552,7 +552,7 @@ function LandingPage({ onStart, onCheckout, checking }) {
           </div>
 
           {/* Mobile + Desktop side by side */}
-          <div style={{ display:"flex", flexDirection:isMobile?"column":"row", gap:32, alignItems:"flex-start", justifyContent:"center", marginBottom:48 }}>
+          <div style={{ display:"flex", flexDirection:"column", gap:32, alignItems:"center", justifyContent:"center", marginBottom:48 }}>
 
             {/* MOBILE MOCKUP */}
             <div style={{ flexShrink:0 }}>
@@ -627,8 +627,8 @@ function LandingPage({ onStart, onCheckout, checking }) {
             </div>
 
             {/* DESKTOP MOCKUP */}
-            {!isMobile && (
-              <div style={{ flex:1, maxWidth:620 }}>
+            {(
+              <div style={{ width:"100%", maxWidth:620 }}>
                 <div style={{ fontSize:11, fontWeight:700, color:S.muted, letterSpacing:"0.08em", textTransform:"uppercase", marginBottom:12, textAlign:"center" }}>🖥️ Desktop</div>
                 <div style={{ background:"#F8F7F5", borderRadius:12, border:"1px solid #D4D4D4", boxShadow:"0 16px 40px rgba(0,0,0,0.12)", overflow:"hidden", display:"flex" }}>
                   {/* Sidebar */}
