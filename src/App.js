@@ -541,6 +541,161 @@ function LandingPage({ onStart, onCheckout, checking }) {
         </div>
       </div>
 
+
+      {/* MOCKUPS SECTION */}
+      <div style={{ background:S.bg, padding:"72px 24px", borderTop:`1px solid ${S.border}` }}>
+        <div style={{ maxWidth:1000, margin:"0 auto" }}>
+          <div style={{ textAlign:"center", marginBottom:48 }}>
+            <div style={{ fontSize:11, fontWeight:700, color:S.muted, letterSpacing:"0.1em", textTransform:"uppercase", marginBottom:10 }}>A dashboard</div>
+            <h2 style={{ fontSize:isMobile?"28px":"40px", fontWeight:800, letterSpacing:"-0.03em", marginBottom:12 }}>Exactamente assim,<br/>no teu bolso e no PC.</h2>
+            <p style={{ fontSize:16, color:S.muted, maxWidth:460, margin:"0 auto" }}>Mobile, desktop, sempre sincronizado.</p>
+          </div>
+
+          {/* Mobile + Desktop side by side */}
+          <div style={{ display:"flex", flexDirection:isMobile?"column":"row", gap:32, alignItems:"flex-start", justifyContent:"center", marginBottom:48 }}>
+
+            {/* MOBILE MOCKUP */}
+            <div style={{ flexShrink:0 }}>
+              <div style={{ fontSize:11, fontWeight:700, color:S.muted, letterSpacing:"0.08em", textTransform:"uppercase", marginBottom:12, textAlign:"center" }}>📱 iPhone</div>
+              <div style={{ width:240, background:"#F8F7F5", borderRadius:30, border:"6px solid #1A1A1A", boxShadow:"0 24px 48px rgba(0,0,0,0.18)", overflow:"hidden" }}>
+                <div style={{ width:70, height:18, background:"#1A1A1A", borderRadius:"0 0 10px 10px", margin:"0 auto" }} />
+                <div style={{ padding:"8px 10px 0", background:"#F8F7F5" }}>
+                  {/* Header */}
+                  <div style={{ background:"#fff", borderBottom:"1px solid #EBEBEB", padding:"8px 12px", display:"flex", justifyContent:"space-between", alignItems:"center", borderRadius:"10px 10px 0 0" }}>
+                    <div style={{ display:"flex", alignItems:"center", gap:6 }}>
+                      <div style={{ width:24, height:24, background:"#1A1A1A", borderRadius:6, display:"flex", alignItems:"center", justifyContent:"center" }}>
+                        <div style={{ display:"flex", alignItems:"flex-end", gap:1.5, height:11 }}>
+                          {[3,5,8,11].map((h,i)=><div key={i} style={{ width:2.5, height:h, background:"#4ade80", borderRadius:"1px 1px 0 0", opacity:[0.3,0.5,0.75,1][i] }} />)}
+                        </div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize:9, fontWeight:700 }}>A minha loja</div>
+                        <div style={{ fontSize:7, color:"#8A8A8A" }}>Dashboard P&L</div>
+                      </div>
+                    </div>
+                    <div style={{ background:"#1A1A1A", color:"#fff", borderRadius:5, padding:"3px 7px", fontSize:8, fontWeight:700 }}>+ Dia</div>
+                  </div>
+                  {/* Hero */}
+                  <div style={{ background:"#F0FDF4", border:"1px solid #86EFAC", borderRadius:10, padding:10, margin:"6px 0" }}>
+                    <div style={{ fontSize:7, fontWeight:700, color:"#8A8A8A", letterSpacing:"0.08em", textTransform:"uppercase", marginBottom:2 }}>Hoje</div>
+                    <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-end" }}>
+                      <div style={{ fontFamily:"'DM Mono',monospace", fontSize:22, fontWeight:800, color:"#16A34A", letterSpacing:"-0.03em" }}>€127.43</div>
+                      <div style={{ textAlign:"right" }}>
+                        <div style={{ fontSize:7, color:"#8A8A8A" }}>vs ontem</div>
+                        <div style={{ fontFamily:"'DM Mono',monospace", fontSize:10, fontWeight:800, color:"#16A34A" }}>↑ €42.10</div>
+                      </div>
+                    </div>
+                    <div style={{ fontSize:7, color:"#8A8A8A", marginTop:3 }}>38.2% margem · ROAS 2.8x</div>
+                  </div>
+                  {/* Metrics */}
+                  <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:5, marginBottom:6 }}>
+                    {[["Faturação","€334.00","#2563EB","↑ €54","#16A34A"],["Adspend","€89.50","#D97706","↑ €12","#DC2626"]].map(([l,v,c,d,dc])=>(
+                      <div key={l} style={{ background:"#fff", border:"1px solid #EBEBEB", borderRadius:8, padding:"8px 9px" }}>
+                        <div style={{ fontSize:7, fontWeight:700, color:"#8A8A8A", textTransform:"uppercase", letterSpacing:"0.06em", marginBottom:3 }}>{l}</div>
+                        <div style={{ fontFamily:"'DM Mono',monospace", fontSize:13, fontWeight:800, color:c }}>{v}</div>
+                        <div style={{ fontSize:7, color:dc, marginTop:2, fontWeight:600 }}>{d} vs ontem</div>
+                      </div>
+                    ))}
+                  </div>
+                  {/* Chart */}
+                  <div style={{ background:"#fff", border:"1px solid #EBEBEB", borderRadius:8, padding:"8px 10px", marginBottom:6 }}>
+                    <div style={{ fontSize:7, fontWeight:700, color:"#8A8A8A", textTransform:"uppercase", letterSpacing:"0.06em", marginBottom:6 }}>Lucro — 30 dias</div>
+                    <div style={{ display:"flex", alignItems:"flex-end", gap:2, height:30 }}>
+                      {[35,28,55,42,68,78,30,58,88,72,95,100].map((h,i)=>(
+                        <div key={i} style={{ flex:1, height:`${h}%`, background:h>50?"#86EFAC":"#FCA5A5", borderRadius:"1px 1px 0 0" }} />
+                      ))}
+                    </div>
+                  </div>
+                  {/* Days */}
+                  {[["18 Abr","€334 · €89 ads","€127.43","#16A34A"],["17 Abr","€280 · €77 ads","€85.33","#16A34A"],["16 Abr","€95 · €88 ads","-€18.50","#DC2626"]].map(([d,s,p,c])=>(
+                    <div key={d} style={{ background:"#fff", border:"1px solid #EBEBEB", borderRadius:8, padding:"8px 10px", marginBottom:4, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+                      <div><div style={{ fontSize:10, fontWeight:600 }}>{d}</div><div style={{ fontSize:7, color:"#8A8A8A" }}>{s}</div></div>
+                      <div style={{ fontFamily:"'DM Mono',monospace", fontSize:11, fontWeight:800, color:c }}>{p}</div>
+                    </div>
+                  ))}
+                </div>
+                {/* Nav */}
+                <div style={{ background:"#fff", borderTop:"1px solid #EBEBEB", padding:"6px 0 12px", display:"flex", justifyContent:"space-around", marginTop:6 }}>
+                  {[["▦","Início",true],["◈","Analytics",false],["⚙","Config",false]].map(([icon,label,active])=>(
+                    <div key={label} style={{ textAlign:"center" }}>
+                      <div style={{ fontSize:13, color:active?"#1A1A1A":"#C4C4C4" }}>{icon}</div>
+                      <div style={{ fontSize:6, fontWeight:700, color:active?"#1A1A1A":"#C4C4C4", letterSpacing:"0.06em", textTransform:"uppercase" }}>{label}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* DESKTOP MOCKUP */}
+            {!isMobile && (
+              <div style={{ flex:1, maxWidth:620 }}>
+                <div style={{ fontSize:11, fontWeight:700, color:S.muted, letterSpacing:"0.08em", textTransform:"uppercase", marginBottom:12, textAlign:"center" }}>🖥️ Desktop</div>
+                <div style={{ background:"#F8F7F5", borderRadius:12, border:"1px solid #D4D4D4", boxShadow:"0 16px 40px rgba(0,0,0,0.12)", overflow:"hidden", display:"flex" }}>
+                  {/* Sidebar */}
+                  <div style={{ width:140, background:"#FAFAF8", borderRight:"1px solid #EBEBEB", display:"flex", flexDirection:"column" }}>
+                    <div style={{ padding:"14px 12px", borderBottom:"1px solid #EBEBEB", display:"flex", alignItems:"center", gap:6 }}>
+                      <div style={{ width:24, height:24, background:"#1A1A1A", borderRadius:7, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                        <div style={{ display:"flex", alignItems:"flex-end", gap:1.5, height:11 }}>
+                          {[3,5,8,11].map((h,i)=><div key={i} style={{ width:2.5, height:h, background:"#4ade80", borderRadius:"1px 1px 0 0", opacity:[0.3,0.5,0.75,1][i] }} />)}
+                        </div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize:10, fontWeight:700 }}>A minha loja</div>
+                        <div style={{ fontSize:8, color:"#8A8A8A" }}>StorePNL</div>
+                      </div>
+                    </div>
+                    <div style={{ padding:"10px 8px", flex:1 }}>
+                      {[["▦","Dashboard",true],["◈","Analytics",false],["+","Adicionar",false],["⚙","Definições",false]].map(([icon,label,active])=>(
+                        <div key={label} style={{ display:"flex", alignItems:"center", gap:6, padding:"7px 8px", borderRadius:7, marginBottom:2, background:active?"#F0F0F0":"transparent" }}>
+                          <span style={{ fontSize:11 }}>{icon}</span>
+                          <span style={{ fontSize:10, fontWeight:active?600:400, color:active?"#1A1A1A":"#8A8A8A" }}>{label}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  {/* Content */}
+                  <div style={{ flex:1, padding:"18px 16px", overflow:"hidden" }}>
+                    <div style={{ fontSize:16, fontWeight:800, letterSpacing:"-0.03em", marginBottom:2 }}>Dashboard</div>
+                    <div style={{ fontSize:10, color:"#8A8A8A", marginBottom:14 }}>sexta-feira, 18 de abril</div>
+                    {/* Hero */}
+                    <div style={{ background:"#F0FDF4", border:"1px solid #86EFAC", borderRadius:12, padding:"14px 16px", marginBottom:10, display:"flex", justifyContent:"space-between" }}>
+                      <div>
+                        <div style={{ fontSize:9, fontWeight:700, color:"#8A8A8A", textTransform:"uppercase", letterSpacing:"0.06em", marginBottom:6 }}>Lucro de Hoje</div>
+                        <div style={{ fontFamily:"'DM Mono',monospace", fontSize:30, fontWeight:800, color:"#16A34A", letterSpacing:"-0.04em" }}>€127.43</div>
+                        <div style={{ fontSize:9, color:"#8A8A8A", marginTop:4 }}>38.2% margem · ROAS 2.8x</div>
+                      </div>
+                      <div style={{ textAlign:"right" }}>
+                        <div style={{ fontSize:9, color:"#8A8A8A", marginBottom:3 }}>vs ontem</div>
+                        <div style={{ fontFamily:"'DM Mono',monospace", fontSize:16, fontWeight:800, color:"#16A34A" }}>↑ €42.10</div>
+                        <div style={{ fontSize:10, color:"#16A34A" }}>+49.4%</div>
+                      </div>
+                    </div>
+                    {/* KPIs */}
+                    <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:7, marginBottom:10 }}>
+                      {[["Faturação","€334.00","#2563EB","↑ €54"],["Adspend","€89.50","#D97706","↑ €12"],["ROAS","2.80x","#16A34A",""]].map(([l,v,c,d])=>(
+                        <div key={l} style={{ background:"#fff", border:"1px solid #EBEBEB", borderRadius:10, padding:"10px 12px" }}>
+                          <div style={{ fontSize:8, fontWeight:700, color:"#8A8A8A", textTransform:"uppercase", letterSpacing:"0.06em", marginBottom:4 }}>{l}</div>
+                          <div style={{ fontFamily:"'DM Mono',monospace", fontSize:14, fontWeight:800, color:c }}>{v}</div>
+                          {d && <div style={{ fontSize:8, color:"#16A34A", marginTop:2 }}>{d} vs ontem</div>}
+                        </div>
+                      ))}
+                    </div>
+                    {/* Chart */}
+                    <div style={{ background:"#fff", border:"1px solid #EBEBEB", borderRadius:10, padding:"10px 12px" }}>
+                      <div style={{ fontSize:8, fontWeight:700, color:"#8A8A8A", textTransform:"uppercase", letterSpacing:"0.06em", marginBottom:8 }}>Lucro / Prejuízo — 30 dias</div>
+                      <div style={{ display:"flex", alignItems:"flex-end", gap:3, height:50 }}>
+                        {[35,28,55,42,68,78,30,58,88,72,95,100].map((h,i)=>(
+                          <div key={i} style={{ flex:1, height:`${h}%`, background:h>50?"#86EFAC":"#FCA5A5", borderRadius:"2px 2px 0 0" }} />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
       {/* STORY */}
       <div style={{ padding:"72px 24px" }}>
         <div style={{ maxWidth:620, margin:"0 auto", background:S.surface, border:`1px solid ${S.border}`, borderRadius:22, padding:isMobile?"24px":"44px" }}>
