@@ -20,3 +20,9 @@
     "development": ["last 1 chrome version"]
   }
 }
+"dependencies": {
+    ...
+    "xlsx": "^0.18.5",
+    "stripe": "^14.0.0",
+    "@vercel/analytics": "^1.0.0"
+  },
