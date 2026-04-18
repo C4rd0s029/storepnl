@@ -733,14 +733,22 @@ function AuthScreen({ initialModo = "login", paymentSuccess = false }) {
           {!isMobile && <div style={{ color:T.textMuted, fontSize:14, marginBottom:32 }}>Entra na tua conta para continuar</div>}
 
           <div style={{ background:T.surface, border:`1px solid ${T.border}`, borderRadius:20, padding:"28px 24px", boxShadow:"0 2px 20px rgba(0,0,0,0.06)" }}>
-            <div style={{ display:"flex", background:T.bg, borderRadius:12, padding:4, marginBottom:24, gap:4 }}>
-              {[["login","Entrar"],["registo","Criar conta"]].map(([m,l]) => (
-                <button key={m} onClick={() => { setModo(m); setErro(""); setSucesso(""); }}
-                  style={{ flex:1, background:modo===m?T.surface:"transparent", border:modo===m?`1px solid ${T.border}`:"1px solid transparent", borderRadius:9, padding:"9px", color:modo===m?T.text:T.textMuted, fontSize:13, fontWeight:600, cursor:"pointer", transition:"all 0.15s", boxShadow:modo===m?"0 1px 4px rgba(0,0,0,0.06)":"none" }}>
-                  {l}
-                </button>
-              ))}
-            </div>
+            {!paymentSuccess && initialModo !== "registo" && (
+              <div style={{ display:"flex", background:T.bg, borderRadius:12, padding:4, marginBottom:24, gap:4 }}>
+                {[["login","Entrar"]].map(([m,l]) => (
+                  <button key={m} onClick={() => { setModo(m); setErro(""); setSucesso(""); }}
+                    style={{ flex:1, background:modo===m?T.surface:"transparent", border:modo===m?`1px solid ${T.border}`:"1px solid transparent", borderRadius:9, padding:"9px", color:modo===m?T.text:T.textMuted, fontSize:13, fontWeight:600, cursor:"pointer", transition:"all 0.15s", boxShadow:modo===m?"0 1px 4px rgba(0,0,0,0.06)":"none" }}>
+                    {l}
+                  </button>
+                ))}
+              </div>
+            )}
+            {(paymentSuccess || initialModo === "registo") && (
+              <div style={{ marginBottom:20 }}>
+                <div style={{ fontSize:16, fontWeight:700, color:T.text, marginBottom:4 }}>Cria a tua conta</div>
+                <div style={{ fontSize:13, color:T.textMuted }}>Define o teu email e password para entrar.</div>
+              </div>
+            )}
 
             <div style={{ marginBottom:12 }}>
               <div style={{ color:T.textMuted, fontSize:11, fontWeight:600, letterSpacing:"0.06em", textTransform:"uppercase", marginBottom:6 }}>Email</div>
@@ -757,7 +765,7 @@ function AuthScreen({ initialModo = "login", paymentSuccess = false }) {
 
             <button onClick={handleSubmit} disabled={loading}
               style={{ width:"100%", background:T.text, border:"none", borderRadius:12, padding:"14px", color:"#fff", fontSize:15, fontWeight:700, cursor:"pointer", letterSpacing:"-0.01em" }}>
-              {loading?"A carregar...":modo==="login"?"Entrar":"Criar conta grátis"}
+              {loading ? "A carregar..." : (paymentSuccess || initialModo === "registo") ? "Criar conta e entrar →" : "Entrar"}
             </button>
           </div>
         </div>
