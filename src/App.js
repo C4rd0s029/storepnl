@@ -2,6 +2,9 @@ import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine, Cell } from "recharts";
 import { supabase } from "./supabaseClient";
 import * as XLSX from "xlsx";
+import { inject } from "@vercel/analytics";
+
+inject();
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const n = (v) => parseFloat(String(v).replace(",", ".")) || 0;
