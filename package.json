@@ -9,7 +9,8 @@
     "recharts": "^2.10.0",
     "@supabase/supabase-js": "^2.39.0",
     "xlsx": "^0.18.5",
-    "stripe": "^14.0.0"
+    "stripe": "^14.0.0",
+    "@vercel/analytics": "^1.0.0"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -20,9 +21,3 @@
     "development": ["last 1 chrome version"]
   }
 }
-"dependencies": {
-    ...
-    "xlsx": "^0.18.5",
-    "stripe": "^14.0.0",
-    "@vercel/analytics": "^1.0.0"
-  },
