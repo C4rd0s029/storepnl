@@ -524,7 +524,7 @@ function LandingPage({ onStart, onCheckout, checking }) {
               ["⚡","Registo em segundos","Faturação, adspend, custos. Em 30 segundos sabes se hoje foi verde ou vermelho."],
               ["📊","Lucro real","Vê o lucro líquido depois de COG, adspend, taxas e devoluções. Sem surpresas."],
               ["📈","Compara com ontem","Cada dia mostra a comparação automática com o anterior. Sabes se estás a melhorar."],
-              ["📱","Mobile first","Instala no iPhone como app. Abre em 2 segundos, sem browser, sem login todas as vezes."],
+              ["📱","Mobile first","Adiciona ao ecrã inicial do iPhone como atalho. Abre em 2 segundos, sem browser, sem login todas as vezes."],
               ["📁","Importa o teu Excel","Tens um P&L Sheet? Faz upload directo e tudo aparece na dashboard em segundos."],
               ["🏪","A tua marca","Adiciona o logo e nome da tua loja. A dashboard fica personalizada só para ti."],
             ].map(([icon,title,desc])=>(
@@ -550,7 +550,7 @@ function LandingPage({ onStart, onCheckout, checking }) {
             <div style={{ width:42, height:42, background:S.text, borderRadius:"50%", display:"flex", alignItems:"center", justifyContent:"center", color:"#fff", fontSize:15, fontWeight:800, flexShrink:0 }}>L</div>
             <div>
               <div style={{ fontSize:14, fontWeight:700 }}>Luís — Fundador do StorePNL</div>
-              <div style={{ fontSize:12, color:S.muted }}>Lojista Shopify · Criador de conteúdo de e-commerce</div>
+              <div style={{ fontSize:12, color:S.muted }}>Criador de conteúdo de e-commerce</div>
             </div>
           </div>
         </div>
@@ -588,7 +588,7 @@ function LandingPage({ onStart, onCheckout, checking }) {
             <h2 style={{ fontSize:isMobile?"28px":"36px", fontWeight:800, letterSpacing:"-0.03em" }}>Tens dúvidas?</h2>
           </div>
           {[
-            ["Preciso de ligar a minha loja Shopify?", "Não. O StorePNL é manual — tu inseris os dados que queres. Não acede à tua loja, não precisa de permissões. Simples e rápido."],
+            ["Preciso de ligar a minha loja Shopify?", "Não. O StorePNL é manual — tu inseris os dados que queres. Não acessa à tua loja, não precisa de permissões. Simples e rápido."],
             ["Os meus dados são privados?", "Sim. Cada conta é completamente isolada. Os teus dados só são acessíveis por ti, protegidos por autenticação segura."],
             ["Posso cancelar quando quiser?", "Sim, sem qualquer penalização. Cancelas a qualquer momento."],
             ["Funciona para outras plataformas?", "Por agora focamos em Shopify, mas como é inserção manual podes usar para qualquer loja."],
